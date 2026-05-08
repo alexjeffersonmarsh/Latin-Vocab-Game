@@ -275,20 +275,26 @@ function findMatches() {
 }
 
 // ===== CLEAR MATCHES =====
+
 function clearMatches(matches) {
   if (!matches.length) return;
 
   playExplosion();
   updateScore(20 * comboMultiplier);
+
+  // ✅ SHOW COMBO MESSAGE
+  showComboText(comboMultiplier);
+
   comboMultiplier++;
 
   matches.forEach(g => {
     recyclePool.push({ id:g.id, word:g.word, definition:g.definition });
     g.element.classList.add("fade-out");
-    setTimeout(()=>g.element.remove(),500);
+    setTimeout(() => g.element.remove(), 500);
     gemBoard[g.row][g.col] = null;
   });
 }
+
 // ===== COMBOS =====
 
 function showComboText(mult) {
