@@ -43,8 +43,25 @@ urbs,city
 navis,ship
     </textarea>
 
-    <!-- Save + generate link -->
-    <button onclick="saveVocabulary()">Save Vocabulary & Get Student Link</button>
+    <button onclick="saveVocabulary()">Save Vocabulary</button>
+
+    <!-- ✅ NEW: Link output area -->
+    <div id="linkArea" style="display:none; margin-top:15px;">
+      <p><strong>Student Game Link:</strong></p>
+
+      <input
+        id="studentLink"
+        type="text"
+        readonly
+        style="width: 100%; padding: 10px; font-size: 14px;"
+      >
+
+      <button onclick="copyLink()" style="margin-top:8px;">
+        Copy Link
+      </button>
+
+      <p id="copyStatus" style="margin-top:6px; font-weight:bold;"></p>
+    </div>
   </div>
 
   <script>
@@ -60,13 +77,24 @@ navis,ship
       // Save vocab list under a unique key
       localStorage.setItem("vocab_" + listName, vocabText);
 
-      const studentLink = "game.html?list=" + encodeURIComponent(listName);
+      // Build the student link (auto-encoded safely)
+      const baseURL = window.location.origin + window.location.pathname.replace("setup.html", "game.html");
+      const link = baseURL + "?list=" + encodeURIComponent(listName);
 
-      alert(
-        "Vocabulary saved successfully!\n\n" +
-        "Share this link with students:\n\n" +
-        studentLink
-      );
+      // Show link on page
+      document.getElementById("studentLink").value = link;
+      document.getElementById("linkArea").style.display = "block";
+      document.getElementById("copyStatus").textContent = "";
+    }
+
+    function copyLink() {
+      const input = document.getElementById("studentLink");
+      input.select();
+      input.setSelectionRange(0, 99999); // mobile support
+
+      navigator.clipboard.writeText(input.value).then(() => {
+        document.getElementById("copyStatus").textContent = "✅ Link copied to clipboard!";
+      });
     }
   </script>
 
