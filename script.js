@@ -289,6 +289,28 @@ function clearMatches(matches) {
     gemBoard[g.row][g.col] = null;
   });
 }
+// ===== COMBOS =====
+
+function showComboText(mult) {
+  const text = document.createElement("div");
+  text.className = "combo-text";
+
+  if (mult < 2) {
+    text.textContent = "COMBO CLEAR!";
+  } else {
+    text.textContent = `x${mult} COMBO!`;
+  }
+
+  text.style.left = "50%";
+  text.style.top = "40%";
+  text.style.transform = "translate(-50%, -50%)";
+
+  gemGrid.appendChild(text);
+
+  setTimeout(() => {
+    text.remove();
+  }, 800);
+}
 
 // ===== GRAVITY =====
 function applyGravity() {
