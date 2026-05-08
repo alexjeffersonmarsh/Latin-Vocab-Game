@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vocabulary Game – Teacher Setup</title>
+
+  <!-- Shared game styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="inputArea">
+    <h2>Teacher Setup</h2>
+    <p>Enter vocabulary using the format:</p>
+    <p><strong>WORD,DEFINITION</strong> (one pair per line)</p>
+
+    <!-- Vocabulary list name -->
+    <input
+      id="listName"
+      type="text"
+      placeholder="List name (e.g. latin1, review, honors)"
+      style="width: 100%; padding: 10px; margin-bottom: 12px;"
+    >
+
+    <!-- Vocabulary input -->
+    <textarea id="vocabInput" rows="12">
+amicus,friend
+bellum,war
+aqua,water
+ignis,fire
+terra,earth
+luna,moon
+sol,sun
+mare,sea
+via,road
+puer,boy
+puella,girl
+rex,king
+regina,queen
+domus,house
+urbs,city
+navis,ship
+    </textarea>
+
+    <!-- Save + generate link -->
+    <button onclick="saveVocabulary()">Save Vocabulary & Get Student Link</button>
+  </div>
+
+  <script>
+    function saveVocabulary() {
+      const vocabText = document.getElementById("vocabInput").value.trim();
+      const listName = document.getElementById("listName").value.trim();
+
+      if (!vocabText || !listName) {
+        alert("Please enter BOTH a list name and vocabulary.");
+        return;
+      }
+
+      // Save vocab list under a unique key
+      localStorage.setItem("vocab_" + listName, vocabText);
+
+      const studentLink = "game.html?list=" + encodeURIComponent(listName);
+
+      alert(
+        "Vocabulary saved successfully!\n\n" +
+        "Share this link with students:\n\n" +
+        studentLink
+      );
+    }
+  </script>
+
+</body>
+</html>
