@@ -282,42 +282,6 @@ function clearMatches(matches) {
   playExplosion();
   updateScore(20 * comboMultiplier);
 
-  // ✅ SHOW COMBO MESSAGE
-  showComboText(comboMultiplier);
-
-  comboMultiplier++;
-
-  matches.forEach(g => {
-    recyclePool.push({ id:g.id, word:g.word, definition:g.definition });
-    g.element.classList.add("fade-out");
-    setTimeout(() => g.element.remove(), 500);
-    gemBoard[g.row][g.col] = null;
-  });
-}
-
-// ===== COMBOS =====
-
-function showComboText(mult) {
-  const text = document.createElement("div");
-  text.className = "combo-text";
-
-  if (mult < 2) {
-    text.textContent = "COMBO CLEAR!";
-  } else {
-    text.textContent = `x${mult} COMBO!`;
-  }
-
-  text.style.left = "50%";
-  text.style.top = "40%";
-  text.style.transform = "translate(-50%, -50%)";
-
-  gemGrid.appendChild(text);
-
-  setTimeout(() => {
-    text.remove();
-  }, 800);
-}
-
 // ===== GRAVITY =====
 function applyGravity() {
   for (let c=0;c<cols;c++) {
@@ -358,6 +322,41 @@ function resolveBoard() {
     setTimeout(()=>{
       const matches = findMatches();
       if (matches.length) {
+    // ✅ SHOW COMBO MESSAGE
+  showComboText(comboMultiplier);
+
+  comboMultiplier++;
+
+  matches.forEach(g => {
+    recyclePool.push({ id:g.id, word:g.word, definition:g.definition });
+    g.element.classList.add("fade-out");
+    setTimeout(() => g.element.remove(), 500);
+    gemBoard[g.row][g.col] = null;
+  });
+}
+
+// ===== COMBOS =====
+
+function showComboText(mult) {
+  const text = document.createElement("div");
+  text.className = "combo-text";
+
+  if (mult < 2) {
+    text.textContent = "COMBO CLEAR!";
+  } else {
+    text.textContent = `x${mult} COMBO!`;
+  }
+
+  text.style.left = "50%";
+  text.style.top = "40%";
+  text.style.transform = "translate(-50%, -50%)";
+
+  gemGrid.appendChild(text);
+
+  setTimeout(() => {
+    text.remove();
+  }, 800);
+}
         clearMatches(matches);
         setTimeout(step,1000);
       }
