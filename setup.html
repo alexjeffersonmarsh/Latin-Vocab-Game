@@ -2,113 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vocabulary Game – Teacher Setup</title>
+  <title>Vocabulary Jewel Game</title>
+
+  <!-- ✅ Correct CSS link -->
   style.css
 </head>
+
 <body>
 
-  <div class="inputArea">
-    <h2>Teacher Setup</h2>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>Score: <span id="score">0</span></div>
+    <div>Time: <span id="timer">180</span>s</div>
+  </div>
 
-    <input
-      id="listName"
-      type="text"
-      placeholder="List name (e.g. latin1, APLAT3_1, review)"
-      style="width:100%; padding:10px; margin-bottom:12px;"
-    >
+  <!-- GAME AREA -->
+  <div class="game">
 
-    <textarea id="vocabInput" rows="12"></textarea>
-
-    <button onclick="saveVocabulary()">Save Vocabulary</button>
-
-    <!-- LINK OUTPUT -->
-    <div id="linkArea" style="display:none; margin-top:15px;">
-      <p><strong>Student Game Link:</strong></p>
-      <input id="studentLink" type="text" readonly style="width:100%; padding:10px;">
-      <button onclick="copyLink()" style="margin-top:8px;">Copy Link</button>
-      <p id="copyStatus"></p>
+    <!-- WORD JEWELS -->
+    <div>
+      <h3>Words</h3>
+      <div id="gemGrid" class="grid"></div>
     </div>
+
+    <!-- DEFINITIONS -->
+    <div>
+      <h3>Definitions</h3>
+      <div id="cardGrid" class="cards"></div>
+    </div>
+
   </div>
 
-  <!-- ✅ SAVED LISTS DASHBOARD -->
-  <div class="inputArea">
-    <h3>Saved Vocabulary Lists</h3>
-    <div id="listContainer"></div>
-  </div>
-
-  <script>
-    function saveVocabulary() {
-      const vocabText = document.getElementById("vocabInput").value.trim();
-      const listName = document.getElementById("listName").value.trim();
-
-      if (!vocabText || !listName) {
-        alert("Enter BOTH list name and vocabulary.");
-        return;
-      }
-
-      localStorage.setItem("vocab_" + listName, vocabText);
-
-      const base = window.location.origin + window.location.pathname.replace("setup.html", "game.html");
-      const link = base + "?list=" + encodeURIComponent(listName);
-
-      document.getElementById("studentLink").value = link;
-      document.getElementById("linkArea").style.display = "block";
-
-      renderLists();
-    }
-
-    function copyLink() {
-      const input = document.getElementById("studentLink");
-      input.select();
-      navigator.clipboard.writeText(input.value).then(() => {
-        document.getElementById("copyStatus").textContent = "✅ Copied!";
-      });
-    }
-
-    // ===== ✅ NEW: RENDER SAVED LISTS =====
-    function renderLists() {
-      const container = document.getElementById("listContainer");
-      container.innerHTML = "";
-
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith("vocab_")) {
-          const listName = key.replace("vocab_", "");
-
-          const div = document.createElement("div");
-          div.style.marginBottom = "10px";
-
-          // Create link
-          const base = window.location.origin + window.location.pathname.replace("setup.html", "game.html");
-          const link = base + "?list=" + encodeURIComponent(listName);
-
-          // Display row
-          div.innerHTML = `
-            <strong>${listName}</strong>
-            <button onclick="copySpecific('${link}')">Copy Link</button>
-            <button onclick="deleteList('${key}')">Delete</button>
-          `;
-
-          container.appendChild(div);
-        }
-      });
-    }
-
-    function copySpecific(link) {
-      navigator.clipboard.writeText(link).then(() => {
-        alert("Link copied!");
-      });
-    }
-
-    function deleteList(key) {
-      if (confirm("Delete this vocabulary list?")) {
-        localStorage.removeItem(key);
-        renderLists();
-      }
-    }
-
-    // Load list on page open
-    renderLists();
-  </script>
+  <!-- ✅ CRITICAL: Load JS at the bottom -->
+  <scriptjs</script>
 
 </body>
 </html>
