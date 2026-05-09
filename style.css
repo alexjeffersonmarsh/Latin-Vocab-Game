@@ -30,7 +30,7 @@ body {
   justify-content: space-around;
   font-size: 20px;
   font-weight: bold;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
 }
 
 #timer { color: #ff5e5e; }
@@ -41,9 +41,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 40px;
+  gap: 30px;
   width: 100%;
-  max-width: 1050px;
+  max-width: 1250px;
 }
 
 .board-column {
