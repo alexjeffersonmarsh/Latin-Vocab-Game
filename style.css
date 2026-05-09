@@ -64,8 +64,8 @@ h3 {
 /* ===== LARGER JEWEL BOARD ===== */
 #gemGrid {
   position: relative;
-  width: 540px;
-  height: 640px;
+  width: 640px;
+  height: 840px;
 
   background: rgba(0, 0, 0, 0.5);
   border-radius: 3px;
@@ -142,6 +142,9 @@ h3 {
   grid-template-columns: repeat(4, 145px);
   grid-template-rows: repeat(5, 105px);
   gap: 10px;
+  position: relative;
+  width: 640px;
+  height: 840px;
 
   background: rgba(0, 0, 0, 0.3);
   padding: 10px;
