@@ -316,8 +316,9 @@ function clearMatches(matches) {
 
     g.element.classList.add("fade-out");
 
+    // Matches fade out and stay in place for 500ms
     setTimeout(() => {
-      g.element.remove();
+      if (g.element) g.element.remove();
     }, 500);
 
     gemBoard[g.row][g.col] = null;
@@ -376,18 +377,22 @@ function resolveBoard() {
   comboMultiplier = 1;
 
   function step() {
-    applyGravity();
-    refillFromRecycle();
-    applyGravity();
-
+    // 1. Pause 500ms so the user can see the "Match" or "Combo" before things drop
     setTimeout(() => {
-      let matches = findMatches();
-
-      if (matches.length > 0) {
-        clearMatches(matches);
-        setTimeout(step, 1000);
-      }
-    }, 100);
+      applyGravity();
+      refillFromRecycle();
+      
+      // 2. We wait 1200ms (1.2s) for the gems to finish their slow fall 
+      // before checking for new matches (combos)
+      setTimeout(() => {
+        let matches = findMatches();
+        if (matches.length > 0) {
+          clearMatches(matches);
+          // Wait another second before repeating if there's a combo
+          setTimeout(step, 1000); 
+        }
+      }, 1200); 
+    }, 500); 
   }
 
   step();
