@@ -2,39 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vocabulary Jewel Game</title>
+  <title>Vocabulary Setup</title>
 
-  <!-- ✅ Correct CSS link -->
-  style.css
+  <link.css
 </head>
 
 <body>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div>Score: <span id="score">0</span></div>
-    <div>Time: <span id="timer">180</span>s</div>
-  </div>
+  <div class="inputArea">
+    <h2>Teacher Setup</h2>
 
-  <!-- GAME AREA -->
-  <div class="game">
+    <p>Enter vocabulary as: <strong>word,definition</strong></p>
 
-    <!-- WORD JEWELS -->
-    <div>
-      <h3>Words</h3>
-      <div id="gemGrid" class="grid"></div>
+    <input
+      id="listName"
+      placeholder="List name (e.g. test)"
+      style="width:100%; padding:10px; margin-bottom:10px;"
+    >
+
+    <textarea id="vocabInput" rows="12"></textarea>
+
+    <button onclick="saveVocabulary()">Save Vocabulary</button>
+
+    <div id="linkArea" style="display:none; margin-top:15px;">
+      <p><strong>Student Link:</strong></p>
+      <input id="studentLink" readonly style="width:100%; padding:10px;">
+      <button onclick="copyLink()">Copy Link</button>
     </div>
 
-    <!-- DEFINITIONS -->
-    <div>
-      <h3>Definitions</h3>
-      <div id="cardGrid" class="cards"></div>
-    </div>
-
   </div>
 
-  <!-- ✅ CRITICAL: Load JS at the bottom -->
-  <scriptjs</script>
+  <script>
+    function saveVocabulary() {
+      const name = document.getElementById("listName").value.trim();
+      const vocab = document.getElementById("vocabInput").value.trim();
+
+      if (!name || !vocab) {
+        alert("Please enter both name and vocab.");
+        return;
+      }
+
+      localStorage.setItem("vocab_" + name, vocab);
+
+      const base = window.location.origin + window.location.pathname.replace("setup.html","game.html");
+      const link = base + "?list=" + encodeURIComponent(name);
+
+      document.getElementById("studentLink").value = link;
+      document.getElementById("linkArea").style.display = "block";
+    }
+
+    function copyLink() {
+      const input = document.getElementById("studentLink");
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert("Link copied!");
+    }
+  </script>
 
 </body>
 </html>
