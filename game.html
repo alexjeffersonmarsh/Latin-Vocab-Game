@@ -5,48 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vocabulary Jewel Game</title>
     
-    <!-- ✅ Fixed: Correct Link to your CSS file -->
+    <!-- ✅ FIX 1: The proper way to link your CSS file -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- UI Header -->
     <div class="stats">
-        <div>💎 SCORE: <span id="score">0</span></div>
-        <div>⏳ TIME: <span id="timer">180</span>s</div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Time: <span id="timer">180</span>s</div>
     </div>
 
-    <!-- Main Game Area -->
     <div id="game-container">
-        
-        <!-- Gem Column -->
         <div class="board-column">
-            <h3>Match the Jewels</h3>
-            <!-- This ID must match your JavaScript exactly -->
+            <h3>Words</h3>
+            <!-- This ID MUST match the one in script.js -->
             <div id="gemGrid"></div>
         </div>
 
-        <!-- Cards Column -->
         <div class="board-column">
             <h3>Definitions</h3>
-            <!-- This ID must match your JavaScript exactly -->
+            <!-- This ID MUST match the one in script.js -->
             <div id="cardGrid"></div>
         </div>
-
     </div>
 
-    <!-- ✅ Fixed: Correct Script Loading -->
+    <!-- ✅ FIX 2: The proper way to load your JavaScript -->
+    <!-- This must be at the bottom, just before the closing body tag -->
     <script src="script.js"></script>
-
-    <!-- Script to "Unlock" Audio on first click (Chrome requirement) -->
-    <script>
-        document.body.addEventListener('click', () => {
-            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }, { once: true });
-    </script>
 
 </body>
 </html>
