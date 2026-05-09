@@ -1,28 +1,29 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Vocabulary Game – Teacher Setup</title>
 
-  <!-- Shared game styles -->
-  <link rel="stylesheet" href="style.css">
+  <!-- Link to your shared CSS -->
+  style.css
 </head>
 <body>
 
   <div class="inputArea">
     <h2>Teacher Setup</h2>
-    <p>Enter vocabulary using the format:</p>
-    <p><strong>WORD,DEFINITION</strong> (one pair per line)</p>
+    <p>Enter vocabulary using:</p>
+    <p><strong>WORD,DEFINITION</strong> (one per line)</p>
 
-    <!-- Vocabulary list name -->
+    <!-- LIST NAME -->
     <input
       id="listName"
       type="text"
-      placeholder="List name (e.g. latin1, review, honors)"
-      style="width: 100%; padding: 10px; margin-bottom: 12px;"
+      placeholder="List name (e.g. latin1, APLAT3_1, review)"
+      style="width:100%; padding:10px; margin-bottom:12px;"
     >
 
-    <!-- Vocabulary input -->
+    <!-- VOCAB INPUT -->
     <textarea id="vocabInput" rows="12">
 amicus,friend
 bellum,war
@@ -44,7 +45,7 @@ navis,ship
 
     <button onclick="saveVocabulary()">Save Vocabulary</button>
 
-    <!-- ✅ NEW: Link output area -->
+    <!-- LINK OUTPUT (hidden until used) -->
     <div id="linkArea" style="display:none; margin-top:15px;">
       <p><strong>Student Game Link:</strong></p>
 
@@ -52,14 +53,14 @@ navis,ship
         id="studentLink"
         type="text"
         readonly
-        style="width: 100%; padding: 10px; font-size: 14px;"
+        style="width:100%; padding:10px; font-size:14px;"
       >
 
       <button onclick="copyLink()" style="margin-top:8px;">
         Copy Link
       </button>
 
-      <p id="copyStatus" style="margin-top:6px; font-weight:bold;"></p>
+      <p id="copyStatus" style="margin-top:5px; font-weight:bold;"></p>
     </div>
   </div>
 
@@ -73,14 +74,14 @@ navis,ship
         return;
       }
 
-      // Save vocab list under a unique key
+      // ✅ Save vocab in browser storage
       localStorage.setItem("vocab_" + listName, vocabText);
 
-      // Build the student link (auto-encoded safely)
-      const baseURL = window.location.origin + window.location.pathname.replace("setup.html", "game.html");
-      const link = baseURL + "?list=" + encodeURIComponent(listName);
+      // ✅ Build correct full URL
+      const base = window.location.origin + window.location.pathname.replace("setup.html", "game.html");
+      const link = base + "?list=" + encodeURIComponent(listName);
 
-      // Show link on page
+      // ✅ Display link on screen
       document.getElementById("studentLink").value = link;
       document.getElementById("linkArea").style.display = "block";
       document.getElementById("copyStatus").textContent = "";
@@ -88,11 +89,12 @@ navis,ship
 
     function copyLink() {
       const input = document.getElementById("studentLink");
+
       input.select();
       input.setSelectionRange(0, 99999); // mobile support
 
       navigator.clipboard.writeText(input.value).then(() => {
-        document.getElementById("copyStatus").textContent = "✅ Link copied to clipboard!";
+        document.getElementById("copyStatus").textContent = "✅ Link copied!";
       });
     }
   </script>
