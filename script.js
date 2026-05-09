@@ -1,6 +1,6 @@
 
 // =====================================================
-// STUDENT-ONLY SCRIPT.JS (FINAL VERSION)
+// STUDENT-ONLY SCRIPT.JS (FINAL CLEAN VERSION)
 // =====================================================
 
 // ===== SETTINGS =====
@@ -57,7 +57,7 @@ const playBuzz = () => playTone(150, 0.3, "square");
 const playExplosion = () => playTone(90, 0.2);
 
 // =====================================================
-// LOAD VOCAB FROM URL (?list=NAME) ✅
+// LOAD VOCAB FROM URL (?list=NAME)
 // =====================================================
 function loadVocabFromStorage() {
   const params = new URLSearchParams(window.location.search);
@@ -94,9 +94,7 @@ function loadVocabFromStorage() {
   return true;
 }
 
-// =====================================================
-// CORE GAME FUNCTIONS
-// =====================================================
+// ===== CORE GAME =====
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
@@ -115,12 +113,12 @@ function startTimer() {
   }, 1000);
 }
 
-// ===== JEWEL POSITION =====
+// ===== POSITION =====
 function positionGem(g) {
   const xOffset = 105;
   const yOffset = 85;
-  g.element.style.left = g.col * xOffset + "px";
-  g.element.style.top = g.row * yOffset + "px";
+  g.element.style.left = (g.col * xOffset) + "px";
+  g.element.style.top = (g.row * yOffset) + "px";
 }
 
 function createGemElement(g) {
@@ -138,7 +136,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BUILD BOARD =====
+// ===== BUILD =====
 function buildBoard() {
   gemBoard = [];
   gemGrid.innerHTML = "";
@@ -164,7 +162,6 @@ function buildBoard() {
   }
 }
 
-// ===== BUILD CARDS =====
 function buildCards() {
   cardGrid.innerHTML = "";
 
@@ -193,7 +190,7 @@ function selectCard(card) {
   tryMatch();
 }
 
-// ===== MATCH LOGIC =====
+// ===== MATCH =====
 function tryMatch() {
   if (!selectedGem || !selectedCard) return;
 
@@ -226,31 +223,22 @@ function tryMatch() {
   selectedCard = null;
 }
 
-// =====================================================
-// COMBO MESSAGE ✅
-// =====================================================
+// ===== COMBO TEXT =====
 function showComboText(mult) {
   const text = document.createElement("div");
   text.className = "combo-text";
 
-  if (mult < 2) {
-    text.textContent = "COMBO CLEAR!";
-  } else {
-    text.textContent = `x${mult} COMBO!`;
-  }
+  text.textContent = mult < 2 ? "COMBO CLEAR!" : `x${mult} COMBO!`;
 
   text.style.left = "50%";
   text.style.top = "40%";
   text.style.transform = "translate(-50%, -50%)";
 
   gemGrid.appendChild(text);
-
   setTimeout(() => text.remove(), 800);
 }
 
-// =====================================================
-// CLUSTER MATCH DETECTION
-// =====================================================
+// ===== FIND MATCHES =====
 function findMatches() {
   const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
   const matches = [];
@@ -271,8 +259,8 @@ function findMatches() {
 
       for (const [nx,ny] of neighbors(x,y)) {
         if (
-          nx>=0 && nx<rows &&
-          ny>=0 && ny<cols &&
+          nx >= 0 && nx < rows &&
+          ny >= 0 && ny < cols &&
           !visited[nx][ny] &&
           gemBoard[nx][ny] &&
           gemBoard[nx][ny].color === color
@@ -282,6 +270,7 @@ function findMatches() {
         }
       }
     }
+
     return cluster;
   }
 
@@ -303,21 +292,14 @@ function clearMatches(matches) {
 
   playExplosion();
   updateScore(20 * comboMultiplier);
-
-  showComboText(comboMultiplier); // ✅ restored message
+  showComboText(comboMultiplier);
 
   comboMultiplier++;
 
   matches.forEach(g => {
-    recyclePool.push({
-      id: g.id,
-      word: g.word,
-      definition: g.definition
-    });
-
+    recyclePool.push({ id:g.id, word:g.word, definition:g.definition });
     g.element.classList.add("fade-out");
     setTimeout(() => g.element.remove(), 500);
-
     gemBoard[g.row][g.col] = null;
   });
 }
@@ -379,9 +361,7 @@ function resolveBoard() {
   step();
 }
 
-// =====================================================
-// INIT ✅
-// =====================================================
+// ===== INIT =====
 if (loadVocabFromStorage()) {
   buildBoard();
   buildCards();
