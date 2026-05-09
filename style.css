@@ -104,11 +104,11 @@ h3 {
 }
 
 /* Darkened Jewel Palette */
-.gem[data-color="red"] { background: #7a0000; border-color: #4a0000 #a51d1d #a51d1d #4a0000; }
+.gem[data-color="red"] { background: #4d0000; border-color: #330000 #800000 #800000 #330000; }
 .gem[data-color="blue"] { background: #001a4d; border-color: #000d26 #003399 #003399 #000d26; }
-.gem[data-color="green"] { background: #003300; border-color: #001a00 #006600 #006600 #001a00; }
+.gem[data-color="green"] { background: #002200; border-color: #001100 #004400 #004400 #001100; }
 .gem[data-color="purple"] { background: #310054; border-color: #1a002e #5e1a91 #5e1a91 #1a002e; }
-.gem[data-color="gold"] { background: #8a6d00; border-color: #5c4900 #bda100 #bda100 #5c4900; }
+.gem[data-color="gold"] { background: #5c4900; border-color: #3d3100 #8a6d00 #8a6d00 #3d3100; }
 
 /* Jewel Text (Scaled) */
 .label {
