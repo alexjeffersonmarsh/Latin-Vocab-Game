@@ -41,7 +41,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 25px;
+  gap: 40px;
   width: 100%;
   max-width: 1050px;
 }
@@ -60,21 +60,24 @@ h3 {
   font-size: 16px;
 }
 
-/* ===== JEWEL BOARD ===== */
+
+/* ===== LARGER JEWEL BOARD ===== */
 #gemGrid {
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 440px;
+  height: 440px;
+
   background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   border: 3px solid #222;
   overflow: hidden;
 }
 
+
 /* ===== JEWELS ===== */
 .gem {
   position: absolute;
-  width: 85px;
+  width: 95px;
   height: 65px;
   display: flex;
   align-items: center;
@@ -133,19 +136,18 @@ h3 {
 }
 
 /* ===== ✅ CARD GRID (4x5 PERFECT FIT FOR LAPTOP) ===== */
+
 #cardGrid {
   display: grid;
-
-  /* ✅ Balanced sizing */
-  grid-template-columns: repeat(4, 75px);
-  grid-template-rows: repeat(5, 55px);
-
-  gap: 8px;
+  grid-template-columns: repeat(4, 85px);
+  grid-template-rows: repeat(5, 65px);
+  gap: 10px;
 
   background: rgba(0, 0, 0, 0.3);
-  padding: 8px;
+  padding: 10px;
   border-radius: 10px;
   border: 3px solid #222;
+
 }
 
 /* ===== CARDS ===== */
@@ -165,7 +167,7 @@ h3 {
 
   text-align: center;
 
-  font-size: 9px;          /* ✅ tuned for 55px height */
+  font-size: 12px;          /* ✅ tuned for 55px height */
   padding: 4px;
   font-weight: bold;
 
