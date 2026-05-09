@@ -100,7 +100,7 @@ h3 {
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   border-width: 7px; /* Thicker borders for larger size */
   border-style: solid;
-  transition: top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s ease, transform 0.15s ease;
+  transition: top 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s ease, transform 0.15s ease;
 }
 
 /* Darkened Jewel Palette */
