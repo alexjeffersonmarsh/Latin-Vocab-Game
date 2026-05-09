@@ -17,6 +17,7 @@ let score = 0;
 let timeLeft = 180;
 let timerInterval;
 let comboMultiplier = 1;
+let isProcessing = false; // Prevents clicks during animations
 
 let vocab = [];
 let fullVocab = [];
@@ -51,7 +52,7 @@ const playChime = () => playTone(600, 0.25);
 const playBuzz = () => playTone(150, 0.3, "square");
 const playExplosion = () => playTone(90, 0.2);
 
-// ===== LOAD VOCAB FROM URL =====
+// ===== LOAD VOCAB =====
 function loadVocabFromStorage() {
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("list");
@@ -87,7 +88,7 @@ function loadVocabFromStorage() {
   return true;
 }
 
-// ===== CORE =====
+// ===== CORE UI =====
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
@@ -101,15 +102,14 @@ function startTimer() {
 
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
+      isProcessing = true;
       alert("Time's up! Final score: " + score);
     }
   }, 1000);
 }
 
-// ===== POSITION =====
+// ===== POSITIONING =====
 function positionGem(g) {
-  // Original 105 * 1.4 = 147
-  // Original 85 * 1.4 = 119
   const xOffset = 147; 
   const yOffset = 119; 
   g.element.style.left = (g.col * xOffset) + "px";
@@ -131,26 +131,22 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BUILD =====
+// ===== BOARD BUILDING =====
 function buildBoard() {
   gemBoard = [];
   gemGrid.innerHTML = "";
-
   const items = [...fullVocab].sort(() => Math.random() - 0.5);
   let i = 0;
 
   for (let r = 0; r < rows; r++) {
     let row = [];
     gemBoard.push(row);
-
     for (let c = 0; c < cols; c++) {
       let item = items[i++];
       let color = colors[Math.floor(Math.random() * colors.length)];
-
       let g = { ...item, color, row: r, col: c };
       g.element = createGemElement(g);
       positionGem(g);
-
       gemGrid.appendChild(g.element);
       row.push(g);
     }
@@ -159,7 +155,6 @@ function buildBoard() {
 
 function buildCards() {
   cardGrid.innerHTML = "";
-
   [...fullVocab].sort(() => Math.random() - 0.5).forEach(item => {
     let d = document.createElement("div");
     d.className = "cell card";
@@ -172,6 +167,7 @@ function buildCards() {
 
 // ===== INTERACTION =====
 function selectGem(g) {
+  if (isProcessing) return;
   if (selectedGem) selectedGem.element.classList.remove("selected");
   selectedGem = g;
   g.element.classList.add("selected");
@@ -179,14 +175,13 @@ function selectGem(g) {
 }
 
 function selectCard(card) {
+  if (isProcessing) return;
   if (selectedCard) selectedCard.classList.remove("selected");
   selectedCard = card;
   card.classList.add("selected");
   tryMatch();
 }
 
-// ===== MATCH =====
-// ===== UPDATED MATCH LOGIC (With Win Condition) =====
 function tryMatch() {
   if (!selectedGem || !selectedCard) return;
 
@@ -194,7 +189,7 @@ function tryMatch() {
     playChime();
     updateScore(10);
 
-    // Remove the gem from board and DOM
+    // Remove from board
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (gemBoard[r][c] && gemBoard[r][c].id === selectedGem.id) {
@@ -204,10 +199,9 @@ function tryMatch() {
       }
     }
 
-    // Remove the card from DOM
     selectedCard.remove();
 
-    // CHECK FOR WIN CONDITION
+    // Check Win Condition
     const remainingCards = document.querySelectorAll(".card").length;
     if (remainingCards === 0) {
       handleWin();
@@ -221,92 +215,60 @@ function tryMatch() {
 
   if (selectedGem) selectedGem.element.classList.remove("selected");
   if (selectedCard) selectedCard.classList.remove("selected");
-
   selectedGem = null;
   selectedCard = null;
 }
 
-// ===== NEW WIN HANDLING FUNCTION =====
+// ===== WIN HANDLING =====
 function handleWin() {
-  clearInterval(timerInterval); // Stop the clock immediately
+  clearInterval(timerInterval);
+  isProcessing = true; 
 
-  const timeBonus = timeLeft * 5; // Example: 5 points for every second left
-  
-  // Show a message to the user
+  const timeBonus = timeLeft * 5;
+  const finalScore = score + timeBonus;
+
   setTimeout(() => {
-    alert(`CLEARED! \nRemaining Time: ${timeLeft}s \nTime Bonus: +${timeBonus}\nFinal Score: ${score + timeBonus}`);
+    alert(`CLEARED!\nTime Remaining: ${timeLeft}s\nTime Bonus: +${timeBonus}\nFinal Score: ${finalScore}`);
     updateScore(timeBonus);
-  }, 1000); // Small delay so they see the final jewel disappear
+  }, 600);
 }
 
-// ===== UPDATE SCORE (Visual check) =====
-function updateScore(val) {
-  score += val;
-  scoreDisplay.textContent = score;
-}
-// ===== COMBO TEXT =====
+// ===== COMBO LOGIC =====
 function showComboText(mult) {
   const text = document.createElement("div");
   text.className = "combo-text";
-
   text.textContent = mult < 2 ? "COMBO CLEAR!" : "x" + mult + " COMBO!";
-
   text.style.left = "50%";
   text.style.top = "40%";
   text.style.transform = "translate(-50%, -50%)";
-
   gemGrid.appendChild(text);
-
   setTimeout(() => text.remove(), 800);
 }
 
-// ===== MATCH FINDING =====
 function findMatches() {
   const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
   const matches = [];
-
-  function getNeighbors(r, c) {
-    return [
-      [r - 1, c],
-      [r + 1, c],
-      [r, c - 1],
-      [r, c + 1]
-    ];
-  }
 
   function floodFill(r, c) {
     const color = gemBoard[r][c].color;
     const stack = [[r, c]];
     const cluster = [];
-
     visited[r][c] = true;
 
     while (stack.length > 0) {
-      const current = stack.pop();
-      const cr = current[0];
-      const cc = current[1];
-
+      const [cr, cc] = stack.pop();
       cluster.push(gemBoard[cr][cc]);
+      const neighbors = [[cr - 1, cc], [cr + 1, cc], [cr, cc - 1], [cr, cc + 1]];
 
-      const neighbors = getNeighbors(cr, cc);
-
-      neighbors.forEach(n => {
-        const nr = n[0];
-        const nc = n[1];
-
-        if (
-          nr >= 0 && nr < rows &&
-          nc >= 0 && nc < cols &&
-          !visited[nr][nc] &&
-          gemBoard[nr][nc] &&
-          gemBoard[nr][nc].color === color
-        ) {
+      neighbors.forEach(([nr, nc]) => {
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+            !visited[nr][nc] && gemBoard[nr][nc] &&
+            gemBoard[nr][nc].color === color) {
           visited[nr][nc] = true;
           stack.push([nr, nc]);
         }
       });
     }
-
     return cluster;
   }
 
@@ -314,59 +276,38 @@ function findMatches() {
     for (let c = 0; c < cols; c++) {
       if (gemBoard[r][c] && !visited[r][c]) {
         const cluster = floodFill(r, c);
-        if (cluster.length >= 3) {
-          cluster.forEach(g => matches.push(g));
-        }
+        if (cluster.length >= 3) cluster.forEach(g => matches.push(g));
       }
     }
   }
-
   return matches;
 }
 
-// ===== CLEAR MATCHES =====
 function clearMatches(matches) {
   if (matches.length === 0) return;
-
   playExplosion();
   updateScore(20 * comboMultiplier);
   showComboText(comboMultiplier);
-
   comboMultiplier++;
 
   matches.forEach(g => {
-    recyclePool.push({
-      id: g.id,
-      word: g.word,
-      definition: g.definition
-    });
-
+    recyclePool.push({ id: g.id, word: g.word, definition: g.definition });
     g.element.classList.add("fade-out");
-
-    // Matches fade out and stay in place for 500ms
-    setTimeout(() => {
-      if (g.element) g.element.remove();
-    }, 500);
-
+    setTimeout(() => { if (g.element) g.element.remove(); }, 500);
     gemBoard[g.row][g.col] = null;
   });
 }
 
-// ===== GRAVITY =====
+// ===== GRAVITY & REFILL =====
 function applyGravity() {
   for (let c = 0; c < cols; c++) {
     let stack = [];
-
     for (let r = rows - 1; r >= 0; r--) {
-      if (gemBoard[r][c]) {
-        stack.push(gemBoard[r][c]);
-      }
+      if (gemBoard[r][c]) stack.push(gemBoard[r][c]);
     }
-
     for (let r = rows - 1; r >= 0; r--) {
       let g = stack.shift() || null;
       gemBoard[r][c] = g;
-
       if (g) {
         g.row = r;
         positionGem(g);
@@ -375,66 +316,55 @@ function applyGravity() {
   }
 }
 
-// ===== REFILL =====
 function refillFromRecycle() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (!gemBoard[r][c] && recyclePool.length) {
         let item = recyclePool.shift();
         let color = colors[Math.floor(Math.random() * colors.length)];
-
-        let g = {
-          ...item,
-          color: color,
-          row: r,
-          col: c
-        };
+        let g = { ...item, color: color, row: r, col: c };
 
         g.element = createGemElement(g);
+        // Spawn above the board
+        g.element.style.left = (c * 147) + "px";
+        g.element.style.top = "-120px"; 
+        
         gemBoard[r][c] = g;
         gemGrid.appendChild(g.element);
-        positionGem(g);
+
+        // Force transition
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            positionGem(g);
+          });
+        });
       }
     }
   }
 }
 
 // ===== RESOLVE LOOP =====
-// ===== RESOLVE LOOP (Fixed Gravity Sync) =====
 function resolveBoard() {
+  isProcessing = true;
   comboMultiplier = 1;
 
   function step() {
-    // 1. Pause to let the "Clear" animation finish
     setTimeout(() => {
-      
-      // 2. Drop existing gems and add new ones
       applyGravity(); 
       refillFromRecycle();
 
-      // 3. CRITICAL: Wait a tiny bit for the DOM to recognize the new gems,
-      // then tell them where their final home is so they fall.
-      setTimeout(() => {
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            if (gemBoard[r][c]) positionGem(gemBoard[r][c]);
-          }
-        }
-      }, 50);
-
-      // 4. Wait for the 1.2s slow-fall animation to finish before checking for combos
+      // Wait for fall animation to finish before checking combos
       setTimeout(() => {
         let matches = findMatches();
         if (matches.length > 0) {
           clearMatches(matches);
-          // If there's a combo, run the step again
-          setTimeout(step, 1000); 
+          step(); 
+        } else {
+          isProcessing = false;
         }
-      }, 1300); // 1300ms to be safe with the 1.2s CSS transition
-      
+      }, 1200); 
     }, 500); 
   }
-
   step();
 }
 
