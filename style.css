@@ -139,8 +139,8 @@ h3 {
 
 #cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, 105px);
-  grid-template-rows: repeat(5, 85px);
+  grid-template-columns: repeat(4, 145px);
+  grid-template-rows: repeat(5, 105px);
   gap: 10px;
 
   background: rgba(0, 0, 0, 0.3);
