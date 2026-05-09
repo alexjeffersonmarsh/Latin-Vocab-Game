@@ -186,6 +186,7 @@ function selectCard(card) {
 }
 
 // ===== MATCH =====
+// ===== UPDATED MATCH LOGIC (With Win Condition) =====
 function tryMatch() {
   if (!selectedGem || !selectedCard) return;
 
@@ -193,6 +194,7 @@ function tryMatch() {
     playChime();
     updateScore(10);
 
+    // Remove the gem from board and DOM
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (gemBoard[r][c] && gemBoard[r][c].id === selectedGem.id) {
@@ -202,11 +204,16 @@ function tryMatch() {
       }
     }
 
-    document.querySelectorAll(".card").forEach(card => {
-      if (Number(card.dataset.id) === selectedGem.id) card.remove();
-    });
+    // Remove the card from DOM
+    selectedCard.remove();
 
-    resolveBoard();
+    // CHECK FOR WIN CONDITION
+    const remainingCards = document.querySelectorAll(".card").length;
+    if (remainingCards === 0) {
+      handleWin();
+    } else {
+      resolveBoard();
+    }
   } else {
     playBuzz();
     updateScore(-2);
@@ -219,6 +226,24 @@ function tryMatch() {
   selectedCard = null;
 }
 
+// ===== NEW WIN HANDLING FUNCTION =====
+function handleWin() {
+  clearInterval(timerInterval); // Stop the clock immediately
+
+  const timeBonus = timeLeft * 5; // Example: 5 points for every second left
+  
+  // Show a message to the user
+  setTimeout(() => {
+    alert(`CLEARED! \nRemaining Time: ${timeLeft}s \nTime Bonus: +${timeBonus}\nFinal Score: ${score + timeBonus}`);
+    updateScore(timeBonus);
+  }, 1000); // Small delay so they see the final jewel disappear
+}
+
+// ===== UPDATE SCORE (Visual check) =====
+function updateScore(val) {
+  score += val;
+  scoreDisplay.textContent = score;
+}
 // ===== COMBO TEXT =====
 function showComboText(mult) {
   const text = document.createElement("div");
