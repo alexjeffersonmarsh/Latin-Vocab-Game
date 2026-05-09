@@ -108,10 +108,12 @@ function startTimer() {
 
 // ===== POSITION =====
 function positionGem(g) {
-  const xOffset = 105;
-  const yOffset = 85;
-  g.element.style.left = g.col * xOffset + "px";
-  g.element.style.top = g.row * yOffset + "px";
+  // Original 105 * 1.4 = 147
+  // Original 85 * 1.4 = 119
+  const xOffset = 147; 
+  const yOffset = 119; 
+  g.element.style.left = (g.col * xOffset) + "px";
+  g.element.style.top = (g.row * yOffset) + "px";
 }
 
 function createGemElement(g) {
