@@ -64,11 +64,11 @@ h3 {
 /* ===== LARGER JEWEL BOARD ===== */
 #gemGrid {
   position: relative;
-  width: 440px;
-  height: 440px;
+  width: 540px;
+  height: 640px;
 
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
+  border-radius: 3px;
   border: 3px solid #222;
   overflow: hidden;
 }
@@ -139,8 +139,8 @@ h3 {
 
 #cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, 85px);
-  grid-template-rows: repeat(5, 65px);
+  grid-template-columns: repeat(4, 105px);
+  grid-template-rows: repeat(5, 85px);
   gap: 10px;
 
   background: rgba(0, 0, 0, 0.3);
