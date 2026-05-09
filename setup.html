@@ -2,82 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vocabulary Setup - Teacher Mode</title>
-    <!-- Link to your existing CSS file -->
+    <title>Teacher Setup - Vocab Gems</title>
+    <!-- Ensure this matches your CSS filename -->
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific tweaks for the setup page */
-        .setup-container {
-            max-width: 600px;
-            width: 90%;
-            margin-top: 50px;
+        /* Forces the stonework background even if style.css isn't loading */
+        body {
+            background-color: #1a1a1d;
+            background-image:
+                linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+                linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+                linear-gradient(225deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+                linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 0, 30px 30px, 0 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #e0e0e0;
         }
-        textarea {
+
+        .setup-card {
             width: 100%;
-            background: #2a2a2e;
-            border: 1px solid #555;
+            max-width: 600px;
+            background: rgba(45, 45, 50, 0.95);
+            border: 3px solid #444;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h2 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #f1c40f;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .instruction {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: #121214;
+            border: 2px solid #333;
+            border-radius: 8px;
             color: #fff;
-            border-radius: 5px;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
             box-sizing: border-box;
-            font-family: monospace;
+            font-family: 'Segoe UI', sans-serif;
+            transition: border-color 0.3s;
         }
-        .link-display {
-            background: #1a1a1d;
-            padding: 15px;
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #f1c40f;
+        }
+
+        button.main-btn {
+            background: linear-gradient(to bottom, #444, #222);
+            border: 2px solid #555;
+            color: white;
+            padding: 15px 30px;
             border-radius: 8px;
-            border: 1px dashed #f1c40f;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        button.main-btn:hover {
+            background: linear-gradient(to bottom, #555, #333);
+            border-color: #f1c40f;
+            transform: translateY(-2px);
+        }
+
+        .link-result {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            border: 1px solid #f1c40f;
+        }
+
+        #studentLink {
+            background: #000;
+            color: #27ae60;
+            font-family: monospace;
+            border: 1px solid #222;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="inputArea setup-container">
-        <h2>💎 Teacher Game Setup</h2>
-        <p>1. Name your list. 2. Enter <b>word,definition</b> (one per line).</p>
+    <div class="setup-card">
+        <h2>Teacher Portal</h2>
+        <p class="instruction">Create a new gem-matching vocabulary list.</p>
 
-        <input
-            id="listName"
-            placeholder="e.g. Spanish-Unit-1"
-            style="width:100%; padding:12px; margin-bottom:15px; border-radius:5px; border:1px solid #555; background:#2a2a2e; color:white; box-sizing: border-box;"
+        <input 
+            type="text" 
+            id="listName" 
+            placeholder="List Name (e.g., French-Gems-1)"
+            autocomplete="off"
         >
 
         <textarea 
             id="vocabInput" 
-            rows="10" 
-            placeholder="Apple,A red fruit&#10;Banana,A long yellow fruit"></textarea>
+            rows="8" 
+            placeholder="word,definition&#10;example,this is an example&#10;gem,a shiny stone"
+        ></textarea>
 
-        <button onclick="saveVocabulary()" style="width:100%; padding:15px; font-size:18px; background:#27ae60;">
-            Generate Student Game Link
-        </button>
+        <button class="main-btn" onclick="saveVocabulary()">Assemble Game</button>
 
-        <div id="linkArea" style="display:none; margin-top:25px;" class="link-display">
-            <p style="color:#f1c40f; margin-top:0;"><strong>✅ Success! Copy this link for students:</strong></p>
-            <input id="studentLink" readonly style="width:100%; padding:10px; background:#000; color:#0f0; border:none; margin-bottom:10px;">
-            <button onclick="copyLink()" style="background:#444; width:100%;">Copy to Clipboard</button>
+        <div id="linkArea" class="link-result" style="display:none;">
+            <p style="margin-top:0; font-weight:bold; color:#f1c40f;">Student Game Link:</p>
+            <input id="studentLink" readonly>
+            <button class="main-btn" onclick="copyLink()" style="margin-top:10px; padding:10px; font-size:12px;">Copy to Clipboard</button>
         </div>
     </div>
 
     <script>
         function saveVocabulary() {
-            const nameInput = document.getElementById("listName");
-            const vocabInput = document.getElementById("vocabInput");
-            
-            const name = nameInput.value.trim();
-            const vocab = vocabInput.value.trim();
+            const name = document.getElementById("listName").value.trim().replace(/\s+/g, '-');
+            const vocab = document.getElementById("vocabInput").value.trim();
 
             if (!name || !vocab) {
-                alert("Please provide a list name and at least one vocabulary pair.");
+                alert("Please name the list and provide vocabulary pairs.");
                 return;
             }
 
-            // Save to LocalStorage with the prefix the game expects
+            // Store in LocalStorage
             localStorage.setItem("vocab_" + name, vocab);
 
-            // Construct the URL
-            // This assumes your game file is named 'game.html' in the same folder
+            // Generate Link
             const currentPath = window.location.pathname;
             const dir = currentPath.substring(0, currentPath.lastIndexOf('/'));
             const base = window.location.origin + dir + "/game.html";
@@ -90,16 +159,8 @@
         function copyLink() {
             const input = document.getElementById("studentLink");
             input.select();
-            input.setSelectionRange(0, 99999); // For mobile
             navigator.clipboard.writeText(input.value);
-            
-            const btn = event.target;
-            btn.textContent = "Copied!";
-            btn.style.background = "#27ae60";
-            setTimeout(() => {
-                btn.textContent = "Copy to Clipboard";
-                btn.style.background = "#444";
-            }, 2000);
+            alert("Link copied! Share this with your students.");
         }
     </script>
 
