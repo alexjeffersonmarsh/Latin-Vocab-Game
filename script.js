@@ -245,37 +245,3 @@ if (loadVocabFromStorage()) {
         if (timeLeft <= 0) { clearInterval(timerInterval); alert("Game Over! Score: " + score); }
     }, 1000);
 }
-💡 Suggested CSS (Since you mentioned CSS troubleshooting)
-Make sure your CSS includes these properties for the board to look right, specifically for the absolute positioning of the gems:
-
-CSS
-#gemGrid {
-  position: relative; /* Essential for g.element.style.left/top to work */
-  width: 420px;
-  height: 425px;
-  overflow: hidden;
-}
-
-.gem {
-  position: absolute;
-  transition: all 0.3s ease-in-out; /* Makes gravity look smooth */
-  width: 100px;
-  height: 80px;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-}
-
-.gem.selected {
-  outline: 4px solid white;
-  transform: scale(1.05);
-  z-index: 10;
-}
-
-.fade-out {
-  opacity: 0;
-  transform: scale(0.5);
-}
