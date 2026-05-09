@@ -2,7 +2,7 @@
 body {
   font-family: 'Times New Roman', Times, serif;
   margin: 0;
-  padding: 10px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,33 +17,34 @@ body {
   color: #e0e0e0;
 }
 
-/* ===== TOP BAR ===== */
-.topbar {
+/* ===== TOP BAR STATS ===== */
+.stats, .topbar {
   width: 100%;
-  max-width: 900px;
+  max-width: 920px;
   background: rgba(30, 30, 35, 0.95);
   border: 2px solid #444;
   border-radius: 50px;
-  padding: 10px 30px;
-  margin-bottom: 15px;
+  padding: 10px 40px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-around;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  box-sizing: border-box;
 }
 
 #timer { color: #ff5e5e; }
 #score { color: #ffd700; }
 
-/* ===== GAME LAYOUT ===== */
+/* ===== GAME MAIN LAYOUT ===== */
 #game-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 30px;
+  gap: 40px;
   width: 100%;
-  max-width: 1250px;
+  max-width: 1200px;
 }
 
 .board-column {
@@ -56,130 +57,94 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #aaa;
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 15px;
+  font-size: 18px;
 }
 
+/* ===== MATCHED BOARD CONTAINERS (440x440) ===== */
+#gemGrid, #cardGrid {
+  width: 440px;
+  height: 440px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 3px solid #333;
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 15px;
+}
 
-/* ===== LARGER JEWEL BOARD ===== */
+/* Jewel Board Logic */
 #gemGrid {
   position: relative;
-  width: 640px;
-  height: 840px;
-
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 3px;
-  border: 3px solid #222;
   overflow: hidden;
 }
 
+/* Card Board Logic (4x5 Grid) */
+#cardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 95px);
+  grid-template-rows: repeat(5, 75px);
+  gap: 8px;
+  justify-content: center;
+  align-content: center;
+}
 
-/* ===== JEWELS ===== */
+/* ===== JEWELS (Darkened for Contrast) ===== */
 .gem {
   position: absolute;
-  width: 95px;
-  height: 65px;
+  width: 90px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
-  clip-path: polygon(
-    30% 0%, 70% 0%,
-    100% 30%, 100% 70%,
-    70% 100%, 30% 100%,
-    0% 70%, 0% 30%
-  );
-
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   border-width: 5px;
   border-style: solid;
-
-  transition:
-    top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    left 0.5s ease,
-    transform 0.15s ease;
+  transition: top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s ease, transform 0.15s ease;
 }
 
-.gem[data-color="red"] {
-  background: #8b0000;
-  border-color: #5a0000 #b22222 #b22222 #5a0000;
-}
-.gem[data-color="blue"] {
-  background: #002366;
-  border-color: #001433 #0047ab #0047ab #001433;
-}
-.gem[data-color="green"] {
-  background: #004d00;
-  border-color: #002600 #008000 #008000 #002600;
-}
-.gem[data-color="purple"] {
-  background: #4b0082;
-  border-color: #2e004d #7a28bb #7a28bb #2e004d;
-}
-.gem[data-color="gold"] {
-  background: #b8860b;
-  border-color: #7a5a00 #daa520 #daa520 #7a5a00;
-}
+/* Darkened Jewel Palette */
+.gem[data-color="red"] { background: #7a0000; border-color: #4a0000 #a51d1d #a51d1d #4a0000; }
+.gem[data-color="blue"] { background: #001a4d; border-color: #000d26 #003399 #003399 #000d26; }
+.gem[data-color="green"] { background: #003300; border-color: #001a00 #006600 #006600 #001a00; }
+.gem[data-color="purple"] { background: #310054; border-color: #1a002e #5e1a91 #5e1a91 #1a002e; }
+.gem[data-color="gold"] { background: #8a6d00; border-color: #5c4900 #bda100 #bda100 #5c4900; }
 
-/* ===== JEWEL TEXT ===== */
+/* Jewel Text: White, All-Caps, 12pt Equivalent */
 .label {
   font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
-  font-size: 12px;
+  font-size: 11pt;
   text-transform: uppercase;
-  color: #ffffff;
+  color: #ffffff !important;
   text-align: center;
   text-shadow: 1px 1px 3px rgba(0,0,0,1);
-  padding: 3px;
+  padding: 4px;
   line-height: 1;
   pointer-events: none;
 }
 
-/* ===== ✅ CARD GRID (4x5 PERFECT FIT FOR LAPTOP) ===== */
-
-#cardGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 145px);
-  grid-template-rows: repeat(5, 105px);
-  gap: 10px;
-  position: relative;
-  width: 640px;
-  height: 840px;
-
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  border-radius: 10px;
-  border: 3px solid #222;
-
-}
-
-/* ===== CARDS ===== */
+/* ===== CARDS (Parchment Style) ===== */
 .card {
   background: #c2a37d;
-  color: #000000;
-
+  color: #000000; /* Black Text */
   font-family: 'Times New Roman', Times, serif;
-  text-transform: uppercase;
-
+  text-transform: uppercase; /* All-Caps */
   border: 2px solid #5d2e0a;
   border-radius: 4px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   text-align: center;
-
-  font-size: 12px;          /* ✅ tuned for 55px height */
-  padding: 4px;
+  font-size: 12pt; /* Requested 12pt font */
+  padding: 5px;
   font-weight: bold;
-
   cursor: pointer;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
   transition: transform 0.2s, background 0.2s;
-
   overflow: hidden;
-  word-break: break-word;
+  word-wrap: break-word;
+  max-width: 95px;
 }
 
 .card:hover {
@@ -187,13 +152,13 @@ h3 {
   transform: scale(1.04);
 }
 
-/* ===== ACTIVE STATES ===== */
+/* ===== INTERACTION STATES ===== */
 .gem.selected, .card.selected {
-  outline: 3px solid #f1c40f;
+  outline: 4px solid #f1c40f;
   outline-offset: 1px;
   filter: brightness(1.3);
-  transform: scale(1.08);
   z-index: 100;
+  transform: scale(1.1);
 }
 
 .fade-out {
@@ -202,29 +167,20 @@ h3 {
   transition: all 0.3s ease;
 }
 
-/* ===== COMBO TEXT ===== */
+/* ===== COMBO POPUP ===== */
 .combo-text {
   position: absolute;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 900;
   color: #ffd700;
-  text-shadow: 0 0 8px black;
+  text-shadow: 0 0 10px rgba(0,0,0,1);
   pointer-events: none;
   z-index: 1000;
   animation: comboPop 0.7s ease-out forwards;
 }
 
 @keyframes comboPop {
-  0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -70%) scale(1.1);
-  }
-  100% {
-    transform: translate(-50%, -100%) scale(1);
-    opacity: 0;
-  }
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
+  100% { transform: translate(-50%, -110%) scale(1); opacity: 0; }
 }
