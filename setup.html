@@ -1,63 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Vocabulary Setup</title>
-
-  <link.css
+    <meta charset="UTF-8">
+    <title>Vocabulary Setup - Teacher Mode</title>
+    <!-- Link to your existing CSS file -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific tweaks for the setup page */
+        .setup-container {
+            max-width: 600px;
+            width: 90%;
+            margin-top: 50px;
+        }
+        textarea {
+            width: 100%;
+            background: #2a2a2e;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        .link-display {
+            background: #1a1a1d;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #f1c40f;
+        }
+    </style>
 </head>
 
 <body>
 
-  <div class="inputArea">
-    <h2>Teacher Setup</h2>
+    <div class="inputArea setup-container">
+        <h2>💎 Teacher Game Setup</h2>
+        <p>1. Name your list. 2. Enter <b>word,definition</b> (one per line).</p>
 
-    <p>Enter vocabulary as: <strong>word,definition</strong></p>
+        <input
+            id="listName"
+            placeholder="e.g. Spanish-Unit-1"
+            style="width:100%; padding:12px; margin-bottom:15px; border-radius:5px; border:1px solid #555; background:#2a2a2e; color:white; box-sizing: border-box;"
+        >
 
-    <input
-      id="listName"
-      placeholder="List name (e.g. test)"
-      style="width:100%; padding:10px; margin-bottom:10px;"
-    >
+        <textarea 
+            id="vocabInput" 
+            rows="10" 
+            placeholder="Apple,A red fruit&#10;Banana,A long yellow fruit"></textarea>
 
-    <textarea id="vocabInput" rows="12"></textarea>
+        <button onclick="saveVocabulary()" style="width:100%; padding:15px; font-size:18px; background:#27ae60;">
+            Generate Student Game Link
+        </button>
 
-    <button onclick="saveVocabulary()">Save Vocabulary</button>
-
-    <div id="linkArea" style="display:none; margin-top:15px;">
-      <p><strong>Student Link:</strong></p>
-      <input id="studentLink" readonly style="width:100%; padding:10px;">
-      <button onclick="copyLink()">Copy Link</button>
+        <div id="linkArea" style="display:none; margin-top:25px;" class="link-display">
+            <p style="color:#f1c40f; margin-top:0;"><strong>✅ Success! Copy this link for students:</strong></p>
+            <input id="studentLink" readonly style="width:100%; padding:10px; background:#000; color:#0f0; border:none; margin-bottom:10px;">
+            <button onclick="copyLink()" style="background:#444; width:100%;">Copy to Clipboard</button>
+        </div>
     </div>
 
-  </div>
+    <script>
+        function saveVocabulary() {
+            const nameInput = document.getElementById("listName");
+            const vocabInput = document.getElementById("vocabInput");
+            
+            const name = nameInput.value.trim();
+            const vocab = vocabInput.value.trim();
 
-  <script>
-    function saveVocabulary() {
-      const name = document.getElementById("listName").value.trim();
-      const vocab = document.getElementById("vocabInput").value.trim();
+            if (!name || !vocab) {
+                alert("Please provide a list name and at least one vocabulary pair.");
+                return;
+            }
 
-      if (!name || !vocab) {
-        alert("Please enter both name and vocab.");
-        return;
-      }
+            // Save to LocalStorage with the prefix the game expects
+            localStorage.setItem("vocab_" + name, vocab);
 
-      localStorage.setItem("vocab_" + name, vocab);
+            // Construct the URL
+            // This assumes your game file is named 'game.html' in the same folder
+            const currentPath = window.location.pathname;
+            const dir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            const base = window.location.origin + dir + "/game.html";
+            const link = base + "?list=" + encodeURIComponent(name);
 
-      const base = window.location.origin + window.location.pathname.replace("setup.html","game.html");
-      const link = base + "?list=" + encodeURIComponent(name);
+            document.getElementById("studentLink").value = link;
+            document.getElementById("linkArea").style.display = "block";
+        }
 
-      document.getElementById("studentLink").value = link;
-      document.getElementById("linkArea").style.display = "block";
-    }
-
-    function copyLink() {
-      const input = document.getElementById("studentLink");
-      input.select();
-      navigator.clipboard.writeText(input.value);
-      alert("Link copied!");
-    }
-  </script>
+        function copyLink() {
+            const input = document.getElementById("studentLink");
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile
+            navigator.clipboard.writeText(input.value);
+            
+            const btn = event.target;
+            btn.textContent = "Copied!";
+            btn.style.background = "#27ae60";
+            setTimeout(() => {
+                btn.textContent = "Copy to Clipboard";
+                btn.style.background = "#444";
+            }, 2000);
+        }
+    </script>
 
 </body>
 </html>
