@@ -20,7 +20,7 @@ body {
 /* ===== TOP BAR STATS ===== */
 .stats, .topbar {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   background: rgba(45, 45, 50, 0.9);
   border: 2px solid #444;
   border-radius: 50px;
@@ -37,48 +37,32 @@ body {
 #timer { color: #ff7e7e; }
 #score { color: #ffeaa7; }
 
-/* ===== TEACHER SETUP AREA ===== */
-.inputArea {
-  width: 100%;
-  max-width: 600px;
-  background: rgba(45, 45, 50, 0.95);
-  border: 3px solid #444;
-  border-radius: 15px;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-}
-
-.inputArea textarea, .inputArea input {
-  background: #121214;
-  border: 2px solid #333;
-  color: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  font-family: 'Times New Roman', Times, serif;
-}
-
 /* ===== GAME MAIN LAYOUT ===== */
-#game-container, .game {
+#game-container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 40px;
+  gap: 30px; /* Space between Jewel board and Card board */
   margin-top: 20px;
   width: 100%;
+  max-width: 1200px;
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h3 {
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #888;
-  text-align: center;
+  margin-bottom: 15px;
 }
 
-/* ===== JEWEL BOARD ===== */
-#gemGrid, .grid {
+/* ===== JEWEL BOARD (4 Wide, 5 Tall) ===== */
+#gemGrid {
   position: relative;
   width: 440px;
   height: 440px;
@@ -88,7 +72,7 @@ h3 {
   overflow: hidden;
 }
 
-/* ===== JEWELS (BEVELED STYLE) ===== */
+/* ===== JEWELS ===== */
 .gem {
   position: absolute;
   width: 95px;
@@ -103,60 +87,60 @@ h3 {
   transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.6s ease, transform 0.15s ease;
 }
 
-/* JEWEL COLORS */
 .gem[data-color="red"] { background: #d32f2f; border-color: #7f1118 #ff6f78 #ff6f78 #7f1118; }
 .gem[data-color="blue"] { background: #1976d2; border-color: #0d3c61 #64b5f6 #64b5f6 #0d3c61; }
 .gem[data-color="green"] { background: #388e3c; border-color: #1b5e20 #81c784 #81c784 #1b5e20; }
 .gem[data-color="purple"] { background: #7b1fa2; border-color: #4a148c #ce93d8 #ce93d8 #4a148c; }
 .gem[data-color="gold"] { background: #fbc02d; border-color: #b28704 #fff176 #fff176 #b28704; }
 
-/* JEWEL TEXT */
 .label {
   font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
-  font-size: 14px;
-  text-transform: uppercase; /* ✅ ALL CAPS */
-  color: #ffffff !important;   /* ✅ ALL JEWELS (INCLUDING GOLD) WHITE TEXT */
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #ffffff !important;
   text-align: center;
   text-shadow: 0 2px 4px rgba(0,0,0,0.9);
   padding: 4px;
-  line-height: 1;
+  line-height: 1.1;
   pointer-events: none;
 }
 
-/* ===== DEFINITION CARDS ===== */
-#cardGrid, .cards {
+/* ===== CARD GRID (Matched to 4 Wide, 5 Tall) ===== */
+#cardGrid {
   display: grid;
-  grid-template-columns: repeat(2, 180px);
-  gap: 12px;
-  max-height: 500px;
-  overflow-y: auto;
-  padding: 5px;
+  grid-template-columns: repeat(4, 105px); /* 4 columns wide */
+  grid-template-rows: repeat(5, 82px);     /* 5 rows tall */
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 12px;
+  border: 3px solid #333;
 }
 
 .card {
   background: #d2b48c;
-  color: #000000;             /* ✅ BLACK TEXT */
+  color: #000000;
   font-family: 'Times New Roman', Times, serif;
-  text-transform: uppercase; /* ✅ ALL CAPS */
+  text-transform: uppercase;
   border: 2px solid #8b4513;
   border-radius: 6px;
-  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 13px;
-  padding: 10px;
+  font-size: 11px; /* Smaller font to ensure definitions fit in grid squares */
+  padding: 5px;
   font-weight: bold;
   cursor: pointer;
   box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
   transition: transform 0.2s, background 0.2s;
+  overflow: hidden; /* Prevents long text from breaking the grid */
 }
 
 .card:hover {
   background: #e6ccab;
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 
 /* ===== INTERACTION STATES ===== */
@@ -165,7 +149,7 @@ h3 {
   outline-offset: 2px;
   filter: brightness(1.2) saturate(1.2);
   z-index: 100;
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .fade-out {
@@ -191,7 +175,3 @@ h3 {
   50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
   100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
 }
-
-/* Custom Scrollbar for Cards */
-#cardGrid::-webkit-scrollbar { width: 8px; }
-#cardGrid::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
