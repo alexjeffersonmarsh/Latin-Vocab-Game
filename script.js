@@ -375,25 +375,38 @@ function refillFromRecycle() {
 }
 
 // ===== RESOLVE LOOP =====
+// ===== RESOLVE LOOP (Fixed Gravity Sync) =====
 function resolveBoard() {
   comboMultiplier = 1;
 
   function step() {
-    // 1. Pause 500ms so the user can see the "Match" or "Combo" before things drop
+    // 1. Pause to let the "Clear" animation finish
     setTimeout(() => {
-      applyGravity();
-      refillFromRecycle();
       
-      // 2. We wait 1200ms (1.2s) for the gems to finish their slow fall 
-      // before checking for new matches (combos)
+      // 2. Drop existing gems and add new ones
+      applyGravity(); 
+      refillFromRecycle();
+
+      // 3. CRITICAL: Wait a tiny bit for the DOM to recognize the new gems,
+      // then tell them where their final home is so they fall.
+      setTimeout(() => {
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            if (gemBoard[r][c]) positionGem(gemBoard[r][c]);
+          }
+        }
+      }, 50);
+
+      // 4. Wait for the 1.2s slow-fall animation to finish before checking for combos
       setTimeout(() => {
         let matches = findMatches();
         if (matches.length > 0) {
           clearMatches(matches);
-          // Wait another second before repeating if there's a combo
+          // If there's a combo, run the step again
           setTimeout(step, 1000); 
         }
-      }, 1200); 
+      }, 1300); // 1300ms to be safe with the 1.2s CSS transition
+      
     }, 500); 
   }
 
