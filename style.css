@@ -1,46 +1,67 @@
-/* ===== CARD GRID (4x5, Adjusted for 12pt Font) ===== */
+/* ===== CARD CONTAINER (Larger Space) ===== */
 #cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, 100px); /* Widened to 100px */
-  grid-template-rows: repeat(5, 80px);   /* Heightened to 80px */
-  gap: 10px;
+  /* 4 columns of 90px centered in a larger area */
+  grid-template-columns: repeat(4, 90px); 
+  grid-template-rows: repeat(5, 70px);
+  gap: 15px; /* Increased gap for more "air" between cards */
 
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  border-radius: 10px;
-  border: 3px solid #222;
+  /* The "Space" for cards is now larger */
+  width: 480px; 
+  height: 480px; 
+  
+  background: rgba(0, 0, 0, 0.4);
+  padding: 25px; /* More internal space */
+  border-radius: 15px;
+  border: 3px solid #333;
+  
+  /* Centers the grid of cards within the large black area */
+  justify-content: center;
+  align-content: center;
+  box-sizing: border-box;
 }
 
-/* ===== CARDS ===== */
+/* ===== CARDS (Small & Compact) ===== */
 .card {
   background: #c2a37d;
   color: #000000;
-
   font-family: 'Times New Roman', Times, serif;
   text-transform: uppercase;
-
+  font-weight: bold;
+  font-size: 12pt;
+  
   border: 2px solid #5d2e0a;
   border-radius: 4px;
-
+  
   display: flex;
   align-items: center;
   justify-content: center;
-
   text-align: center;
-  font-size: 12pt;          /* ✅ Requested 12pt font */
-  line-height: 1.1;         /* Tightens spacing between lines */
-  padding: 6px;
-  font-weight: bold;
+  padding: 5px;
+  
+  /* Size constraints */
+  width: 90px;
+  height: 70px;
+  box-sizing: border-box;
 
+  /* 20 Character Limit Protection */
+  max-width: 90px;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all; /* Forces break if a word is too long */
+  
   cursor: pointer;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
   transition: transform 0.2s, background 0.2s;
-
-  overflow: hidden;
-  word-break: break-word;   
 }
 
 .card:hover {
   background: #d4bc9c;
-  transform: scale(1.03);
+  transform: scale(1.05);
+}
+
+/* Ensure the game container can hold the larger card area */
+#game-container {
+  gap: 50px; /* Pushes the jewel board and card area further apart */
+  max-width: 1300px;
 }
