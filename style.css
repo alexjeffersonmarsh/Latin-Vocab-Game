@@ -1,316 +1,67 @@
+/* ===== CARD CONTAINER (Larger Space) ===== */
+#cardGrid {
+  display: grid;
+  /* 4 columns of 90px centered in a larger area */
+  grid-template-columns: repeat(4, 90px); 
+  grid-template-rows: repeat(5, 70px);
+  gap: 15px; /* Increased gap for more "air" between cards */
 
-/* ===== GLOBAL THEME & STONEWORK ===== */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  background-color: #1a1a1d;
-  background-image:
-    linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(225deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%);
-  background-size: 60px 60px;
-  background-position: 0 0, 30px 0, 30px 30px, 0 30px;
-
-  color: #e0e0e0;
-}
-
-/* ===== UI CONTAINERS ===== */
-.topbar,
-.inputArea {
-  width: 100%;
-  max-width: 1400px; /* ✅ wider top area */
-  background: rgba(45, 45, 50, 0.9);
-  border: 2px solid #444;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.5),
-    inset 0 0 15px rgba(0,0,0,0.3);
-  display: flex;
-  justify-content: space-between;
+  /* The "Space" for cards is now larger */
+  width: 480px; 
+  height: 480px; 
+  
+  background: rgba(0, 0, 0, 0.4);
+  padding: 25px; /* More internal space */
+  border-radius: 15px;
+  border: 3px solid #333;
+  
+  /* Centers the grid of cards within the large black area */
+  justify-content: center;
+  align-content: center;
   box-sizing: border-box;
 }
 
-.inputArea {
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-textarea {
-  width: 100%;
-  background: #2a2a2e;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 5px;
-  padding: 10px;
-}
-
-button {
-  padding: 10px 30px;
-  background: #444;
-  color: white;
-  border: 1px solid #666;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background: #555;
-}
-
-/* ===== GAME LAYOUT ===== */
-.game {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-
-  width: 100%;
-  max-width: 1600px; /* ✅ nearly full screen */
-  margin-top: 30px;
-
-  gap: 35px; /* ✅ space between boards */
-}
-
-h3 {
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #888;
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-/* ===== GEM BOARD ===== */
-
-.grid {
-  position: relative;
-  width: 560px;   /* 5 × 105px + buffer */
-  height: 400px;  /* ✅ matches card board height */
-
-  z-index: 1;
-  overflow: visible;  /* ✅ allows hover/scale without clipping */
-  pointer-events: none;
-}
-
-/* ===== GEM JEWELS ===== */
-
-.gem {
-  position: absolute;
-  width: 85px;
-  height: 70px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  overflow: hidden;
-
-  /* Octagon shape */
-  clip-path: polygon(
-    30% 0%, 70% 0%,
-    100% 30%, 100% 70%,
-    70% 100%, 30% 100%,
-    0% 70%, 0% 30%
-  );
-
-  /* ✅ Beveled jewel effect */
-  border-width: 6px;
-  border-style: solid;
-
-  /* Default (will be overridden per color) */
-  border-top-color: rgba(0,0,0,0.4);
-  border-left-color: rgba(0,0,0,0.4);
-  border-right-color: rgba(255,255,255,0.4);
-  border-bottom-color: rgba(255,255,255,0.4);
-
-  box-shadow:
-    0 6px 10px rgba(0,0,0,0.6);
-
-  transition:
-    top 1s ease,
-    left 1s ease,
-    transform 0.18s ease,
-    filter 0.18s ease;
-
-  pointer-events: auto;
-}
-
-/* ===== JEWEL TEXT ===== */
-.label {
-  font-family: "Segoe UI", "Arial Rounded MT Bold", Arial, sans-serif;
-  font-weight: 800;
-  font-size: 14px;
-  line-height: 1.15;
-
-  text-transform: uppercase;
-  
-  color: #ffffff;
-  -webkit-text-stroke: 0.6px rgba(0,0,0,0.85);
-
-  text-shadow:
-    0 1px 2px rgba(0,0,0,0.9),
-    0 0 4px rgba(0,0,0,0.6);
-
-  background: rgba(0,0,0,0.25);
-  border-radius: 4px;
-  padding: 6px 8px;
-
-  text-align: center;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ===== JEWEL COLORS ===== */
-.gem[data-color="red"] {
-  background: #d32f2f;
-  border-top-color: #7f1118;
-  border-left-color: #7f1118;
-  border-right-color: #ff6f78;
-  border-bottom-color: #ff6f78;
-}
-
-.gem[data-color="blue"] {
-  background: #1976d2;
-  border-top-color: #0d3c61;
-  border-left-color: #0d3c61;
-  border-right-color: #64b5f6;
-  border-bottom-color: #64b5f6;
-}
-
-.gem[data-color="green"] {
-  background: #388e3c;
-  border-top-color: #1b5e20;
-  border-left-color: #1b5e20;
-  border-right-color: #81c784;
-  border-bottom-color: #81c784;
-}
-
-.gem[data-color="purple"] {
-  background: #7b1fa2;
-  border-top-color: #4a148c;
-  border-left-color: #4a148c;
-  border-right-color: #ce93d8;
-  border-bottom-color: #ce93d8;
-}
-
-.gem[data-color="gold"] {
-  background: #fbc02d;
-  border-top-color: #b28704;
-  border-left-color: #b28704;
-  border-right-color: #fff176;
-  border-bottom-color: #fff176;
-}
-
-/* ===== FADE OUT ===== */
-.gem.fade-out {
-  opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-/* ===== SHIMMER ===== */
-.gem::after {
-  content: '';
-  position: absolute;
-  top: -100%;
-  left: -100%;
-  width: 300%;
-  height: 300%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(255,255,255,0.1) 45%,
-    rgba(255,255,255,0.4) 50%,
-    rgba(255,255,255,0.1) 55%,
-    transparent
-  );
-  transform: rotate(45deg);
-  transition: all 1s ease-in-out;
-  z-index: 1;
-}
-
-.gem:hover {
-  transform: scale(1.08) translateY(-2px);
-  filter: brightness(1.15) saturate(1.15);
-}
-
-.gem:hover::after {
-  left: 100%;
-  top: 100%;
-}
-
-.gem:active {
-  transform: scale(0.96);
-  filter: brightness(0.85);
-}
-
-/* ===== DEFINITION CARDS ===== */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(5, 90px); /* ✅ wider cards */
-  grid-template-rows: repeat(4, 90px);
-  gap: 12px;
-
-  position: relative;
-  z-index: 2;
-}
-
+/* ===== CARDS (Small & Compact) ===== */
 .card {
-  background: #d2b48c;
-  color: #2c1e11;
-  border: 2px solid #8b4513;
+  background: #c2a37d;
+  color: #000000;
+  font-family: 'Times New Roman', Times, serif;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12pt;
+  
+  border: 2px solid #5d2e0a;
   border-radius: 4px;
+  
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 5px;
+  
+  /* Size constraints */
+  width: 90px;
+  height: 70px;
+  box-sizing: border-box;
 
-  font-size: 13px; /* ✅ easier to read */
-  padding: 6px;
-  font-weight: bold;
-
-  text-transform: uppercase;
+  /* 20 Character Limit Protection */
+  max-width: 90px;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all; /* Forces break if a word is too long */
   
   cursor: pointer;
-  box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
   transition: transform 0.2s, background 0.2s;
 }
 
 .card:hover {
-  background: #e6ccab;
-  transform: translateY(-2px);
+  background: #d4bc9c;
+  transform: scale(1.05);
 }
 
-/* ===== SELECTION STATE ===== */
-.selected {
-  outline: 4px solid #ffeb3b;
-  outline-offset: 2px;
-  filter: brightness(1.3) saturate(1.2) !important;
-  z-index: 10;
-  transform: scale(1.15) !important;
+/* Ensure the game container can hold the larger card area */
+#game-container {
+  gap: 50px; /* Pushes the jewel board and card area further apart */
+  max-width: 1300px;
 }
-
-/* ===== COMBO TEXT ===== */
-.combo-text {
-  position: absolute;
-  font-size: 28px;
-  font-weight: bold;
-  color: gold;
-  text-shadow: 2px 2px 6px black;
-  pointer-events: none;
-  z-index: 20;
-  animation: comboPop 0.8s ease-out forwards;
-}
-
-@keyframes comboPop {
-  0%
