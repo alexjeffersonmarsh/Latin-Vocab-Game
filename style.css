@@ -1,13 +1,11 @@
-
 /* ===== GLOBAL THEME & STONEWORK ===== */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   margin: 0;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-
   background-color: #1a1a1d;
   background-image:
     linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%),
@@ -16,69 +14,60 @@ body {
     linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%);
   background-size: 60px 60px;
   background-position: 0 0, 30px 0, 30px 30px, 0 30px;
-
   color: #e0e0e0;
 }
 
-/* ===== TOP BAR & SETUP ===== */
-.topbar,
-.inputArea {
+/* ===== TOP BAR STATS ===== */
+.stats, .topbar {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1000px;
   background: rgba(45, 45, 50, 0.9);
   border: 2px solid #444;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 50px;
+  padding: 15px 40px;
   margin-bottom: 20px;
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.5),
-    inset 0 0 15px rgba(0,0,0,0.3);
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   box-sizing: border-box;
 }
 
+#timer { color: #ff7e7e; }
+#score { color: #ffeaa7; }
+
+/* ===== TEACHER SETUP AREA ===== */
 .inputArea {
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ===== INPUTS ===== */
-textarea,
-input {
   width: 100%;
-  background: #2a2a2e;
-  border: 1px solid #555;
+  max-width: 600px;
+  background: rgba(45, 45, 50, 0.95);
+  border: 3px solid #444;
+  border-radius: 15px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+}
+
+.inputArea textarea, .inputArea input {
+  background: #121214;
+  border: 2px solid #333;
   color: #fff;
-  border-radius: 5px;
-  padding: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Times New Roman', Times, serif;
 }
 
-button {
-  padding: 10px 30px;
-  background: #444;
-  color: white;
-  border: 1px solid #666;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background: #555;
-}
-
-/* ===== GAME LAYOUT ===== */
-.game {
+/* ===== GAME MAIN LAYOUT ===== */
+#game-container, .game {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  gap: 40px;
+  margin-top: 20px;
   width: 100%;
-  max-width: 1600px;
-  margin-top: 30px;
-  gap: 70px;
 }
 
 h3 {
@@ -86,177 +75,80 @@ h3 {
   letter-spacing: 2px;
   color: #888;
   text-align: center;
-  margin-bottom: 15px;
 }
 
 /* ===== JEWEL BOARD ===== */
-.grid {
+#gemGrid, .grid {
   position: relative;
-  width: 560px;
-  height: 400px;
-  z-index: 1;
-  overflow: visible;
-  pointer-events: none;
+  width: 440px;
+  height: 440px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  border: 3px solid #333;
+  overflow: hidden;
 }
 
 /* ===== JEWELS (BEVELED STYLE) ===== */
 .gem {
   position: absolute;
-  width: 85px;
-  height: 70px;
-
+  width: 95px;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
-  overflow: hidden;
-
-  clip-path: polygon(
-    30% 0%, 70% 0%,
-    100% 30%, 100% 70%,
-    70% 100%, 30% 100%,
-    0% 70%, 0% 30%
-  );
-
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   border-width: 6px;
   border-style: solid;
-
-  box-shadow:
-    0 6px 10px rgba(0,0,0,0.6);
-
-  transition:
-    top 0.6s ease,
-    left 0.6s ease,
-    transform 0.15s ease,
-    filter 0.15s ease;
-
-  pointer-events: auto;
+  transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.6s ease, transform 0.15s ease;
 }
 
-/* ===== JEWEL COLORS ===== */
-.gem[data-color="red"] {
-  background: #d32f2f;
-  border-top-color: #7f1118;
-  border-left-color: #7f1118;
-  border-right-color: #ff6f78;
-  border-bottom-color: #ff6f78;
-}
+/* JEWEL COLORS */
+.gem[data-color="red"] { background: #d32f2f; border-color: #7f1118 #ff6f78 #ff6f78 #7f1118; }
+.gem[data-color="blue"] { background: #1976d2; border-color: #0d3c61 #64b5f6 #64b5f6 #0d3c61; }
+.gem[data-color="green"] { background: #388e3c; border-color: #1b5e20 #81c784 #81c784 #1b5e20; }
+.gem[data-color="purple"] { background: #7b1fa2; border-color: #4a148c #ce93d8 #ce93d8 #4a148c; }
+.gem[data-color="gold"] { background: #fbc02d; border-color: #b28704 #fff176 #fff176 #b28704; }
 
-.gem[data-color="blue"] {
-  background: #1976d2;
-  border-top-color: #0d3c61;
-  border-left-color: #0d3c61;
-  border-right-color: #64b5f6;
-  border-bottom-color: #64b5f6;
-}
-
-.gem[data-color="green"] {
-  background: #388e3c;
-  border-top-color: #1b5e20;
-  border-left-color: #1b5e20;
-  border-right-color: #81c784;
-  border-bottom-color: #81c784;
-}
-
-.gem[data-color="purple"] {
-  background: #7b1fa2;
-  border-top-color: #4a148c;
-  border-left-color: #4a148c;
-  border-right-color: #ce93d8;
-  border-bottom-color: #ce93d8;
-}
-
-.gem[data-color="gold"] {
-  background: #fbc02d;
-  border-top-color: #b28704;
-  border-left-color: #b28704;
-  border-right-color: #fff176;
-  border-bottom-color: #fff176;
-}
-
-/* ===== JEWEL TEXT ===== */
+/* JEWEL TEXT */
 .label {
-  font-family: "Segoe UI", "Arial Rounded MT Bold", Arial, sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  line-height: 1.15;
-
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-
-  color: #ffffff;
-  -webkit-text-stroke: 0.6px rgba(0,0,0,0.85);
-
-  background: rgba(0,0,0,0.25);
-  border-radius: 4px;
-  padding: 6px 8px;
-
-  text-shadow:
-    0 1px 2px rgba(0,0,0,0.9),
-    0 0 4px rgba(0,0,0,0.6);
-
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 900;
+  font-size: 14px;
+  text-transform: uppercase; /* ✅ ALL CAPS */
+  color: #ffffff !important;   /* ✅ WHITE TEXT */
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+  padding: 4px;
+  line-height: 1;
   pointer-events: none;
-  z-index: 2;
 }
 
-/* Gold text override */
-.gem[data-color="gold"] .label {
-  color: #111;
-}
-
-/* ===== STATES ===== */
-.selected {
-  outline: 4px solid #ffeb3b;
-  outline-offset: 2px;
-  filter: brightness(1.25) saturate(1.2) !important;
-  transform: scale(1.1) !important;
-  z-index: 10;
-}
-
-.gem:hover {
-  transform: scale(1.05) translateY(-2px);
-  filter: brightness(1.1);
-}
-
-.gem:active {
-  transform: scale(0.96);
-  filter: brightness(0.9);
-}
-
-/* ===== FADE OUT ===== */
-.gem.fade-out {
-  opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-/* ===== CARDS ===== */
-.cards {
+/* ===== DEFINITION CARDS ===== */
+#cardGrid, .cards {
   display: grid;
-  grid-template-columns: repeat(4, 90px);
-  grid-template-rows: repeat(5, 90px);
+  grid-template-columns: repeat(2, 180px);
   gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 5px;
 }
 
 .card {
   background: #d2b48c;
-  color: #2c1e11;
+  color: #000000;             /* ✅ BLACK TEXT */
+  font-family: 'Times New Roman', Times, serif;
+  text-transform: uppercase; /* ✅ ALL CAPS */
   border: 2px solid #8b4513;
-  border-radius: 4px;
-
+  border-radius: 6px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-
   text-align: center;
   font-size: 13px;
-  padding: 6px;
+  padding: 10px;
   font-weight: bold;
-
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-
   cursor: pointer;
   box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
   transition: transform 0.2s, background 0.2s;
@@ -264,37 +156,42 @@ h3 {
 
 .card:hover {
   background: #e6ccab;
-  transform: translateY(-2px);
+  transform: scale(1.02);
+}
+
+/* ===== INTERACTION STATES ===== */
+.gem.selected, .card.selected {
+  outline: 4px solid #ffeb3b;
+  outline-offset: 2px;
+  filter: brightness(1.2) saturate(1.2);
+  z-index: 100;
+  transform: scale(1.05);
+}
+
+.fade-out {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.4s ease;
 }
 
 /* ===== COMBO TEXT ===== */
 .combo-text {
   position: absolute;
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 32px;
+  font-weight: 900;
   color: gold;
-  text-shadow: 2px 2px 6px black;
+  text-shadow: 0 0 10px rgba(0,0,0,1);
   pointer-events: none;
-  z-index: 20;
+  z-index: 1000;
   animation: comboPop 0.8s ease-out forwards;
 }
 
 @keyframes comboPop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1);
-  }
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
+  100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
 }
 
-/* ===== VISIBILITY ===== */
-.hidden {
-  display: none;
-}
+/* Custom Scrollbar for Cards */
+#cardGrid::-webkit-scrollbar { width: 8px; }
+#cardGrid::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
