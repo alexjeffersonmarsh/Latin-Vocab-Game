@@ -371,12 +371,25 @@ function showComboText(mult) {
       ? "COMBO CLEAR!"
       : "x" + mult + " COMBO!";
 
+  // Strong positioning
+  text.style.position = "absolute";
   text.style.left = "50%";
   text.style.top = "40%";
+  text.style.transform = "translate(-50%, -50%)";
+
+  // Make sure it appears ABOVE gems
+  text.style.zIndex = "9999";
+
+  // Prevent interaction weirdness
+  text.style.pointerEvents = "none";
 
   gemGrid.appendChild(text);
 
-  setTimeout(() => text.remove(), 800);
+  setTimeout(() => {
+    if (text.parentNode) {
+      text.remove();
+    }
+  }, 1000);
 }
 
 function findMatches() {
@@ -595,7 +608,7 @@ async function resolveBoard() {
 
     clearMatches(matches);
 
-    await wait(CLEAR_TIME);
+    await wait(CLEAR_TIME + 250);
   }
 
   isProcessing = false;
