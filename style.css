@@ -6,14 +6,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #1a1a1d;
-  background-image:
-    linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(225deg, rgba(0,0,0,0.15) 25%, transparent 25%),
-    linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%);
-  background-size: 60px 60px;
-  background-position: 0 0, 30px 0, 30px 30px, 0 30px;
+  background-color: #0f0f12;
+  background-image: 
+    radial-gradient(circle at center, rgba(40, 40, 50, 0.8) 0%, rgba(10, 10, 15, 1) 100%),
+    linear-gradient(315deg, rgba(0,0,0,0.3) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(0,0,0,0.3) 25%, transparent 25%);
+  background-size: cover, 60px 60px;
   color: #e0e0e0;
 }
 
@@ -21,8 +19,8 @@ body {
 .stats, .topbar {
   width: 95%;
   max-width: 1300px;
-  background: rgba(30, 30, 35, 0.95);
-  border: 3px solid #444;
+  background: linear-gradient(180deg, #2c2c2e 0%, #1a1a1c 100%);
+  border: 2px solid #4a4a4d;
   border-radius: 60px;
   padding: 15px 50px;
   margin-bottom: 25px;
@@ -30,51 +28,36 @@ body {
   justify-content: space-around;
   font-size: 32px;
   font-weight: bold;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
   box-sizing: border-box;
 }
 
-#timer { color: #ff5e5e; }
-#score { color: #ffd700; }
+#timer { color: #ff5e5e; text-shadow: 0 0 10px rgba(255,94,94,0.5); }
+#score { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
 
 /* ===== GAME MAIN LAYOUT ===== */
 #game-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
   gap: 60px;
   width: 100%;
   max-width: 1600px;
-}
-
-.board-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-h3 {
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: #aaa;
-  margin-bottom: 20px;
-  font-size: 26px;
 }
 
 /* ===== CONTAINERS ===== */
 #gemGrid, #cardGrid {
   width: 615px; 
   height: 615px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 4px solid #333;
-  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 3px solid #222;
+  border-radius: 12px;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
   box-sizing: border-box;
-  padding: 10px; /* Adjusted to give jewels more room */
 }
 
 #gemGrid {
   position: relative;
-  overflow: hidden; /* This hides jewels while they are "above" the board */
+  overflow: hidden;
 }
 
 #cardGrid {
@@ -86,7 +69,7 @@ h3 {
   align-content: center;
 }
 
-/* ===== JEWELS (Gravity Fix Applied) ===== */
+/* ===== PREMIUM JEWELS ===== */
 .gem {
   position: absolute;
   width: 126px;
@@ -95,96 +78,105 @@ h3 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  
+  /* The Shape */
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   
-  /* FIXED GRAVITY: Faster transition (0.6s) and Cubic-Bezier for a slight "drop" feel */
-  transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.4s ease, transform 0.1s ease;
-  will-change: top; /* Tells browser to optimize for movement */
+  /* FASTER TRANSITION: 0.4s for snappy gravity */
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s ease, transform 0.1s ease;
+  will-change: top;
   
-  box-sizing: border-box;
+  /* Premium Depth Effects */
+  box-shadow: 
+    inset 0 10px 15px rgba(255,255,255,0.3), /* Top Shine */
+    inset 0 -10px 15px rgba(0,0,0,0.5);      /* Bottom Shadow */
   z-index: 5;
 }
 
-/* Base colors (Gradients are applied via JS, but these act as fallbacks) */
-.gem[data-color="red"] { border: 4px solid #a30000; }
-.gem[data-color="blue"] { border: 4px solid #062c43; }
-.gem[data-color="green"] { border: 4px solid #145a32; }
-.gem[data-color="purple"] { border: 4px solid #4a235a; }
-.gem[data-color="gold"] { border: 4px solid #967117; }
+/* Adding a pseudo-element for that "Glass Shine" */
+.gem::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 20%;
+  width: 60%;
+  height: 30%;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+}
 
-/* Jewel Text */
+/* Richer Color Palette with High Contrast Borders */
+.gem[data-color="red"] { border: 3px solid #ff4d4d; box-shadow: inset 0 0 20px #800000, 0 5px 15px rgba(255,0,0,0.3); }
+.gem[data-color="blue"] { border: 3px solid #3498db; box-shadow: inset 0 0 20px #001a4d, 0 5px 15px rgba(0,0,255,0.3); }
+.gem[data-color="green"] { border: 3px solid #2ecc71; box-shadow: inset 0 0 20px #002200, 0 5px 15px rgba(0,255,0,0.3); }
+.gem[data-color="purple"] { border: 3px solid #9b59b6; box-shadow: inset 0 0 20px #310054, 0 5px 15px rgba(155,0,255,0.3); }
+.gem[data-color="gold"] { border: 3px solid #f1c40f; box-shadow: inset 0 0 20px #5c4900, 0 5px 15px rgba(255,215,0,0.3); }
+
+/* Jewel Text Enhancement */
 .label {
   font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
-  font-size: 16pt;
+  font-size: 15pt;
   text-transform: uppercase;
   color: #ffffff !important;
-  text-align: center;
-  text-shadow: 2px 2px 4px rgba(0,0,0,1);
-  padding: 6px;
-  line-height: 1.1;
+  text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+  z-index: 2;
   pointer-events: none;
-  user-select: none;
 }
 
-/* ===== CARDS ===== */
+/* ===== PREMIUM CARDS ===== */
 .card {
-  background: #c2a37d;
-  color: #000000;
-  font-family: 'Times New Roman', Times, serif;
-  text-transform: uppercase;
-  border: 3px solid #5d2e0a;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #e3c9a8 0%, #c2a37d 100%);
+  color: #2c1e10;
+  border: 2px solid #5d2e0a;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 17pt;
-  padding: 8px;
+  font-size: 16pt;
+  padding: 10px;
   font-weight: bold;
-  cursor: pointer;
-  box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
-  transition: transform 0.2s, background 0.2s;
-  overflow: hidden;
-  word-wrap: break-word;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-  background: #d4bc9c;
-  transform: scale(1.04);
+  background: linear-gradient(135deg, #f3dec3 0%, #d4bc9c 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.5);
 }
 
-/* ===== INTERACTION STATES ===== */
+/* ===== INTERACTION ===== */
 .gem.selected, .card.selected {
-  outline: 6px solid #f1c40f;
+  outline: 4px solid #ffffff;
   outline-offset: 2px;
-  filter: brightness(1.3);
+  filter: brightness(1.2) saturate(1.2);
+  box-shadow: 0 0 30px #ffffff;
   z-index: 100;
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .fade-out {
   opacity: 0;
-  transform: scale(0.1);
-  transition: all 0.4s ease;
+  transform: scale(1.5); /* Jewel "bursts" outward */
+  filter: brightness(2);
+  transition: all 0.4s ease-out;
 }
 
 /* ===== COMBO POPUP ===== */
 .combo-text {
   position: absolute;
-  font-size: 45px;
+  font-size: 50px;
   font-weight: 900;
-  color: #ffd700;
-  text-shadow: 0 0 15px rgba(0,0,0,1);
-  pointer-events: none;
-  z-index: 1000;
-  animation: comboPop 0.7s ease-out forwards;
+  color: #fff;
+  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+  animation: comboPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes comboPop {
-  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-  50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
-  100% { transform: translate(-50%, -110%) scale(1); opacity: 0; }
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  50% { opacity: 1; transform: translate(-50%, -100%) scale(1.2); }
+  100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
 }
-
-```
