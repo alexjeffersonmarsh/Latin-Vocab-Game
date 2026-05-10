@@ -319,45 +319,31 @@ function applyGravity() {
 function refillFromRecycle() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      // Check if a slot is empty and we have words available to fill it
       if (!gemBoard[r][c] && recyclePool.length) {
         let item = recyclePool.shift();
         let color = colors[Math.floor(Math.random() * colors.length)];
+        let g = { ...item, color: color, row: r, col: c };
 
-        let g = {
-          ...item,
-          color: color,
-          row: r,
-          col: c
-        };
-
-        // 1. Create the element
+        // 1. Create and set initial "Spawn" position
         g.element = createGemElement(g);
-        
-        // 2. Set the INITIAL "Spawn" position (Above the visible grid)
-        // We use -150px so it is completely hidden by the overflow:hidden container
         g.element.style.left = (c * 147) + "px";
         g.element.style.top = "-150px"; 
         
-        // 3. Add to the DOM
         gemGrid.appendChild(g.element);
-
-        /* 
-           4. THE VOID TRICK (Force Reflow)
-           This line does nothing visible, but it "tricks" the browser into 
-           acknowledging that the jewel is currently at -150px. 
-        */
-        void g.element.offsetWidth; 
-
-        // 5. Update the board state
         gemBoard[r][c] = g;
 
-        /* 
-           6. Set the FINAL position
-           Because the browser now knows it started at -150px, it will
-           smoothly animate to the new 'top' value using the CSS transition.
-        */
-        positionGem(g);
+        // 2. FORCE REFLOW (The "Poke")
+        void g.element.offsetWidth; 
+
+        // 3. The Double Frame Guarantee
+        // This ensures the browser paints the -150px state before moving
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (gemBoard[r][c] === g) {
+              positionGem(g);
+            }
+          });
+        });
       }
     }
   }
