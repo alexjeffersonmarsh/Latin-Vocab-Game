@@ -365,26 +365,42 @@ function refillFromRecycle() {
 
 // ===== RESOLVE LOOP =====
 function resolveBoard() {
-  isProcessing = true;
+  isProcessing = true; // Lock user input
   comboMultiplier = 1;
 
   function step() {
+    // 1. First, let the "Match Clear" (fade-out) animation finish
     setTimeout(() => {
+      
+      // 2. Move existing gems down and spawn new ones from the top
       applyGravity(); 
       refillFromRecycle();
 
-      // Wait for fall animation to finish before checking combos
+      /* 
+         3. WAIT FOR GRAVITY: 
+         Your CSS transition is 0.4s (400ms).
+         We wait 500ms to be safe, ensuring the jewels are physically 
+         settled in their new slots before we scan for combos.
+      */
       setTimeout(() => {
         let matches = findMatches();
+        
         if (matches.length > 0) {
+          // If we found a combo, clear it and increment the multiplier
           clearMatches(matches);
-          step(); 
+          
+          // 4. RECURSION: Run the step again to check for chain reactions
+          // We wait 600ms to let the "Explosion/Fade" finish before the next drop
+          setTimeout(step, 600); 
         } else {
+          // 5. FINISHED: No more matches found, unlock the game for the player
           isProcessing = false;
         }
-      }, 1200); 
-    }, 500); 
+      }, 500); // This delay syncs with your 0.4s CSS transition
+      
+    }, 400); // Delay to let the previous match disappear
   }
+
   step();
 }
 
