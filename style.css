@@ -79,22 +79,20 @@ body {
   justify-content: center;
   cursor: pointer;
   
-  /* Initial state hidden at top */
+  /* Start hidden for the spawn logic */
   top: -150px; 
   
-  /* GPU Acceleration to prevent "sticking" */
+  /* Force onto GPU to prevent animation "sticking" */
   transform: translateZ(0);
   backface-visibility: hidden;
   
   /* The Shape */
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   
-  /* Transition Logic */
-  transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              left 0.3s ease, 
-              transform 0.1s ease, 
-              filter 0.3s ease, 
-              opacity 0.3s ease;
+  /* Snappy Gravity Transitions */
+  transition-property: top, left, transform, filter, opacity;
+  transition-duration: 0.4s;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: top;
   
   /* Premium Depth Effects */
