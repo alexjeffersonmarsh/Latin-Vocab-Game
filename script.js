@@ -88,16 +88,25 @@ function startTimer() {
   }, 1000);
 }
 
-// ===== POSITIONING (The "Nuclear" Version) =====
+// ===== POSITIONING (HARDENED) =====
 function positionGem(g) {
   if (!g || !g.element) return;
   const xOffset = 147; 
   const yOffset = 119; 
+  
+  // Set moving flag to protect animation
+  g.element.setAttribute('data-moving', 'true');
+  
   g.element.style.left = (g.col * xOffset) + "px";
   g.element.style.top = (g.row * yOffset) + "px";
-  // Sync datasets for debugging
+
+  // Sync datasets
   g.element.dataset.row = g.row;
   g.element.dataset.col = g.col;
+
+  setTimeout(() => {
+    if(g.element) g.element.setAttribute('data-moving', 'false');
+  }, 450);
 }
 
 function createGemElement(g) {
@@ -254,7 +263,7 @@ function clearMatches(matches) {
   });
 }
 
-// ===== GRAVITY & REFILL (Hardened) =====
+// ===== GRAVITY & REFILL =====
 function applyGravity() {
   for (let c = 0; c < cols; c++) {
     let stack = [];
@@ -282,7 +291,6 @@ function refillFromRecycle() {
         let g = { ...item, color, row: r, col: c };
         g.element = createGemElement(g);
         
-        // Disable transition for spawn
         g.element.style.transition = "none";
         g.element.style.left = (c * 147) + "px";
         g.element.style.top = "-150px"; 
@@ -290,31 +298,17 @@ function refillFromRecycle() {
         gemGrid.appendChild(g.element);
         gemBoard[r][c] = g;
         
-        void g.element.offsetWidth; // Force Reflow
+        void g.element.offsetHeight; // Force Paint
 
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (g.element) {
-              g.element.style.transition = ""; 
-              positionGem(g);
-            }
-          });
-        });
+        setTimeout(() => {
+          if (g.element) {
+            g.element.style.transition = ""; 
+            positionGem(g);
+          }
+        }, 50);
       }
     }
   }
-  // Nuclear Safety Clean-up
-  setTimeout(() => {
-    document.querySelectorAll('.gem').forEach(el => {
-      if (el.style.top === "-150px") {
-        for(let r=0; r<rows; r++) {
-          for(let c=0; c<cols; c++) {
-            if(gemBoard[r][c] && gemBoard[r][c].element === el) positionGem(gemBoard[r][c]);
-          }
-        }
-      }
-    });
-  }, 150);
 }
 
 // ===== RESOLVE LOOP =====
@@ -325,15 +319,16 @@ function resolveBoard() {
     setTimeout(() => {
       applyGravity(); 
       refillFromRecycle();
+      // Increased buffer to 750ms for reliable physics completion
       setTimeout(() => {
         let matches = findMatches();
         if (matches.length > 0) {
           clearMatches(matches);
-          setTimeout(step, 650); 
+          setTimeout(step, 700); 
         } else {
           isProcessing = false;
         }
-      }, 600); 
+      }, 750); 
     }, 400); 
   }
   step();
