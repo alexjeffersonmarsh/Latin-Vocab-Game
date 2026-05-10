@@ -179,8 +179,11 @@ function positionGem(g) {
 
   g.element.setAttribute("data-moving", "true");
 
-  g.element.style.left = (g.col * xOffset) + "px";
-  g.element.style.top = (g.row * yOffset) + "px";
+  const x = g.col * xOffset;
+  const y = g.row * yOffset;
+
+  g.element.style.transform =
+    `translate(${x}px, ${y}px)`;
 
   g.element.dataset.row = g.row;
   g.element.dataset.col = g.col;
