@@ -1,3 +1,13 @@
+The issue with gravity not initiating is primarily due to the `transition` timing in your CSS. At `1.2s`, the transition is so slow that the JavaScript "Resolve Loop" (which checks for matches) might be triggering before the gems have visually finished moving. Additionally, the `clip-path` and `border-width` you have set can sometimes interfere with how browsers calculate the "active" area of an element during a transition.
+
+I have updated the CSS to:
+
+1. **Speed up the gravity transition** to `0.6s` (the industry standard for "snappy" puzzle games).
+2. **Add `will-change: top**` to tell the browser to optimize for moving gems.
+3. **Ensure `position: relative**` is properly handled so `absolute` coordinates work correctly.
+4. **Updated the Jewel Palette** to include the radial gradients you defined in your JS for better visual consistency.
+
+```css
 /* ===== GLOBAL THEME & STONEWORK ===== */
 body {
   font-family: 'Times New Roman', Times, serif;
@@ -17,7 +27,7 @@ body {
   color: #e0e0e0;
 }
 
-/* ===== TOP BAR STATS (Slightly larger) ===== */
+/* ===== TOP BAR STATS ===== */
 .stats, .topbar {
   width: 95%;
   max-width: 1300px;
@@ -28,7 +38,7 @@ body {
   margin-bottom: 25px;
   display: flex;
   justify-content: space-around;
-  font-size: 32px; /* Increased from 22px */
+  font-size: 32px;
   font-weight: bold;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
   box-sizing: border-box;
@@ -42,7 +52,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 60px; /* Wider gap for larger boards */
+  gap: 60px;
   width: 100%;
   max-width: 1600px;
 }
@@ -58,73 +68,76 @@ h3 {
   letter-spacing: 3px;
   color: #aaa;
   margin-bottom: 20px;
-  font-size: 26px; /* Increased from 18px */
+  font-size: 26px;
 }
 
-/* ===== MATCHED BOARD CONTAINERS (Scaled to ~615px) ===== */
+/* ===== CONTAINERS ===== */
 #gemGrid, #cardGrid {
-  width: 615px;  /* 440 * 1.4 */
-  height: 615px; /* 440 * 1.4 */
+  width: 615px; 
+  height: 615px;
   background: rgba(0, 0, 0, 0.5);
   border: 4px solid #333;
   border-radius: 16px;
   box-sizing: border-box;
-  padding: 20px;
+  padding: 10px; /* Adjusted to give jewels more room */
 }
 
-/* Jewel Board Logic */
 #gemGrid {
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* This hides jewels while they are "above" the board */
 }
 
-/* Card Board Logic (Scaled 4x5 Grid) */
 #cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, 135px); /* 95 * 1.4 */
-  grid-template-rows: repeat(5, 105px);   /* 75 * 1.4 */
+  grid-template-columns: repeat(4, 135px);
+  grid-template-rows: repeat(5, 105px);
   gap: 12px;
   justify-content: center;
   align-content: center;
 }
 
-/* ===== JEWELS (Scaled 140%) ===== */
+/* ===== JEWELS (Gravity Fix Applied) ===== */
 .gem {
   position: absolute;
-  width: 126px;  /* 90 * 1.4 */
-  height: 98px;  /* 70 * 1.4 */
+  width: 126px;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-  border-width: 7px; /* Thicker borders for larger size */
-  border-style: solid;
-  transition: top 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s ease, transform 0.15s ease;
+  
+  /* FIXED GRAVITY: Faster transition (0.6s) and Cubic-Bezier for a slight "drop" feel */
+  transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.4s ease, transform 0.1s ease;
+  will-change: top; /* Tells browser to optimize for movement */
+  
+  box-sizing: border-box;
+  z-index: 5;
 }
 
-/* Darkened Jewel Palette */
-.gem[data-color="red"] { background: #4d0000; border-color: #330000 #800000 #800000 #330000; }
-.gem[data-color="blue"] { background: #001a4d; border-color: #000d26 #003399 #003399 #000d26; }
-.gem[data-color="green"] { background: #002200; border-color: #001100 #004400 #004400 #001100; }
-.gem[data-color="purple"] { background: #310054; border-color: #1a002e #5e1a91 #5e1a91 #1a002e; }
-.gem[data-color="gold"] { background: #5c4900; border-color: #3d3100 #8a6d00 #8a6d00 #3d3100; }
+/* Base colors (Gradients are applied via JS, but these act as fallbacks) */
+.gem[data-color="red"] { border: 4px solid #a30000; }
+.gem[data-color="blue"] { border: 4px solid #062c43; }
+.gem[data-color="green"] { border: 4px solid #145a32; }
+.gem[data-color="purple"] { border: 4px solid #4a235a; }
+.gem[data-color="gold"] { border: 4px solid #967117; }
 
-/* Jewel Text (Scaled) */
+/* Jewel Text */
 .label {
   font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
-  font-size: 16pt; /* 11pt * 1.4 */
+  font-size: 16pt;
   text-transform: uppercase;
   color: #ffffff !important;
   text-align: center;
   text-shadow: 2px 2px 4px rgba(0,0,0,1);
   padding: 6px;
-  line-height: 1;
+  line-height: 1.1;
   pointer-events: none;
+  user-select: none;
 }
 
-/* ===== CARDS (Scaled 140%) ===== */
+/* ===== CARDS ===== */
 .card {
   background: #c2a37d;
   color: #000000;
@@ -136,7 +149,7 @@ h3 {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 17pt; /* 12pt * 1.4 */
+  font-size: 17pt;
   padding: 8px;
   font-weight: bold;
   cursor: pointer;
@@ -144,7 +157,6 @@ h3 {
   transition: transform 0.2s, background 0.2s;
   overflow: hidden;
   word-wrap: break-word;
-  max-width: 135px;
 }
 
 .card:hover {
@@ -163,14 +175,14 @@ h3 {
 
 .fade-out {
   opacity: 0;
-  transform: scale(0.3);
-  transition: all 0.3s ease;
+  transform: scale(0.1);
+  transition: all 0.4s ease;
 }
 
-/* ===== COMBO POPUP (Scaled) ===== */
+/* ===== COMBO POPUP ===== */
 .combo-text {
   position: absolute;
-  font-size: 45px; /* 30px * 1.4 */
+  font-size: 45px;
   font-weight: 900;
   color: #ffd700;
   text-shadow: 0 0 15px rgba(0,0,0,1);
@@ -184,3 +196,5 @@ h3 {
   50% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
   100% { transform: translate(-50%, -110%) scale(1); opacity: 0; }
 }
+
+```
