@@ -324,26 +324,29 @@ function refillFromRecycle() {
         let color = colors[Math.floor(Math.random() * colors.length)];
         let g = { ...item, color: color, row: r, col: c };
 
-        // 1. Create and set initial "Spawn" position
         g.element = createGemElement(g);
+        
+        // 1. DISABLE transitions immediately so it doesn't "slide" to the spawn point
+        g.element.style.transition = "none";
+        
+        // 2. Set spawn position
         g.element.style.left = (c * 147) + "px";
         g.element.style.top = "-150px"; 
         
         gemGrid.appendChild(g.element);
         gemBoard[r][c] = g;
 
-        // 2. FORCE REFLOW (The "Poke")
-        void g.element.offsetWidth; 
+        // 3. FORCE a layout flush
+        void g.element.offsetWidth;
 
-        // 3. The Double Frame Guarantee
-        // This ensures the browser paints the -150px state before moving
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (gemBoard[r][c] === g) {
-              positionGem(g);
-            }
-          });
-        });
+        // 4. RE-ENABLE transitions and move to final slot
+        // We use a tiny timeout to ensure the "none" transition was respected
+        setTimeout(() => {
+          if (g.element) {
+            g.element.style.transition = ""; // Reverts to CSS file settings
+            positionGem(g);
+          }
+        }, 10);
       }
     }
   }
