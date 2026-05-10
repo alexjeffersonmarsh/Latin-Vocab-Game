@@ -79,16 +79,22 @@ body {
   justify-content: center;
   cursor: pointer;
   
-  /* Initial state to help JS logic */
+  /* Initial state hidden at top */
   top: -150px; 
+  
+  /* GPU Acceleration to prevent "sticking" */
+  transform: translateZ(0);
+  backface-visibility: hidden;
   
   /* The Shape */
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
   
-  /* GRAVITY TRANSITION: High priority on 'top' */
-  transition-property: top, left, transform, filter, opacity;
-  transition-duration: 0.4s;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transition Logic */
+  transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              left 0.3s ease, 
+              transform 0.1s ease, 
+              filter 0.3s ease, 
+              opacity 0.3s ease;
   will-change: top;
   
   /* Premium Depth Effects */
@@ -110,13 +116,14 @@ body {
   pointer-events: none;
 }
 
-/* Color Palette */
+/* Richer Color Palette */
 .gem[data-color="red"] { border: 3px solid #ff4d4d; box-shadow: inset 0 0 20px #800000, 0 5px 15px rgba(255,0,0,0.3); }
 .gem[data-color="blue"] { border: 3px solid #3498db; box-shadow: inset 0 0 20px #001a4d, 0 5px 15px rgba(0,0,255,0.3); }
 .gem[data-color="green"] { border: 3px solid #2ecc71; box-shadow: inset 0 0 20px #002200, 0 5px 15px rgba(0,255,0,0.3); }
 .gem[data-color="purple"] { border: 3px solid #9b59b6; box-shadow: inset 0 0 20px #310054, 0 5px 15px rgba(155,0,255,0.3); }
 .gem[data-color="gold"] { border: 3px solid #f1c40f; box-shadow: inset 0 0 20px #5c4900, 0 5px 15px rgba(255,215,0,0.3); }
 
+/* Jewel Text Enhancement */
 .label {
   font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
