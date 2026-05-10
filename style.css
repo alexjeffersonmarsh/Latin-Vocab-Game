@@ -39,11 +39,22 @@ body {
   font-weight: 900;
   color: #e0e0e0;
   text-align: right;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.7),
+    inset 0 1px 1px rgba(255,255,255,0.1);
 }
 
-#timer { color: #ff5e5e; text-shadow: 0 0 10px rgba(255,94,94,0.5); margin-left: 10px; }
-#score { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); margin-left: 10px; }
+#timer {
+  color: #ff5e5e;
+  text-shadow: 0 0 10px rgba(255,94,94,0.5);
+  margin-left: 10px;
+}
+
+#score {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  margin-left: 10px;
+}
 
 /* ===== GAME CONTAINERS ===== */
 #game-container {
@@ -55,8 +66,9 @@ body {
   margin-top: 20px;
 }
 
-#gemGrid, #cardGrid {
-  width: 615px; 
+#gemGrid,
+#cardGrid {
+  width: 615px;
   height: 615px;
   background: rgba(0, 0, 0, 0.6);
   border: 3px solid #222;
@@ -65,7 +77,12 @@ body {
   box-sizing: border-box;
 }
 
-#gemGrid { position: relative; overflow: hidden; }
+/* IMPORTANT HARDENING */
+#gemGrid {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
 
 #cardGrid {
   display: grid;
@@ -76,40 +93,93 @@ body {
   align-content: center;
 }
 
-/* ===== PREMIUM JEWELS (HARDENED) ===== */
+/* ===== PREMIUM JEWELS ===== */
 .gem {
   position: absolute;
   width: 126px;
   height: 98px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   cursor: pointer;
-  top: -150px; 
-  
-  /* Performance Locks */
+
+  top: -150px;
+  left: 0;
+
+  /* Rendering Stability */
   transform: translate3d(0, 0, 0);
-  will-change: top, left;
-  contain: layout style;
+
+  will-change:
+    top,
+    left,
+    transform,
+    opacity;
+
+  contain: layout style paint;
+
   backface-visibility: hidden;
-  
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Shape */
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0% 70%,
+    0% 30%
+  );
+
+  /* IMPORTANT:
+     ONLY animate movement-related properties.
+     "transition: all" can create conflicts with fade-outs
+     and scaling animations.
+  */
+  transition:
+    top 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    left 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.25s ease,
+    opacity 0.4s ease;
+
   z-index: 5;
 }
 
+/* While moving */
 .gem[data-moving="true"] {
-  z-index: 10;
+  z-index: 20;
   pointer-events: none;
 }
 
-/* Colors */
-.gem[data-color="red"] { border: 3px solid #ff4d4d; box-shadow: inset 0 0 20px #800000; }
-.gem[data-color="blue"] { border: 3px solid #3498db; box-shadow: inset 0 0 20px #001a4d; }
-.gem[data-color="green"] { border: 3px solid #2ecc71; box-shadow: inset 0 0 20px #002200; }
-.gem[data-color="purple"] { border: 3px solid #9b59b6; box-shadow: inset 0 0 20px #310054; }
-.gem[data-color="gold"] { border: 3px solid #f1c40f; box-shadow: inset 0 0 20px #5c4900; }
+/* ===== GEM COLORS ===== */
+.gem[data-color="red"] {
+  border: 3px solid #ff4d4d;
+  box-shadow: inset 0 0 20px #800000;
+}
 
+.gem[data-color="blue"] {
+  border: 3px solid #3498db;
+  box-shadow: inset 0 0 20px #001a4d;
+}
+
+.gem[data-color="green"] {
+  border: 3px solid #2ecc71;
+  box-shadow: inset 0 0 20px #002200;
+}
+
+.gem[data-color="purple"] {
+  border: 3px solid #9b59b6;
+  box-shadow: inset 0 0 20px #310054;
+}
+
+.gem[data-color="gold"] {
+  border: 3px solid #f1c40f;
+  box-shadow: inset 0 0 20px #5c4900;
+}
+
+/* ===== LABELS ===== */
 .label {
   font-weight: 900;
   font-size: 15pt;
@@ -117,52 +187,126 @@ body {
   color: #ffffff;
   text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
   pointer-events: none;
+  user-select: none;
 }
 
 /* ===== CARDS ===== */
 .card {
-  background: linear-gradient(135deg, #e3c9a8 0%, #c2a37d 100%);
+  background: linear-gradient(
+    135deg,
+    #e3c9a8 0%,
+    #c2a37d 100%
+  );
+
   color: #2c1e10;
+
   border: 2px solid #5d2e0a;
+
   border-radius: 8px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   text-align: center;
+
   font-size: 16pt;
+
   padding: 10px;
+
   font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.4);
+
+  transition:
+    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    filter 0.2s ease;
 }
 
-/* ===== EFFECTS ===== */
-.gem.selected, .card.selected {
+/* ===== SELECTION EFFECTS ===== */
+.gem.selected,
+.card.selected {
   outline: 4px solid #ffffff;
   outline-offset: 2px;
+
   filter: brightness(1.2);
+
   transform: scale(1.08);
+
   z-index: 100;
 }
 
+/* ===== GEM CLEAR EFFECT ===== */
 .fade-out {
   opacity: 0;
   transform: scale(1.5);
-  transition: all 0.4s ease-out;
+
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s ease-out;
 }
 
+/* ===== COMBO TEXT ===== */
 .combo-text {
   position: absolute;
+
+  left: 50%;
+  top: 40%;
+
+  transform: translate(-50%, -50%);
+
   font-size: 50px;
   font-weight: 900;
-  color: #fff;
-  text-shadow: 0 0 10px #ffd700;
+
+  color: #ffffff;
+
+  text-shadow:
+    0 0 10px #ffd700,
+    0 0 20px #ffcc00,
+    0 0 35px rgba(255,215,0,0.7);
+
   pointer-events: none;
-  z-index: 1000;
-  animation: comboPop 0.8s forwards;
+
+  z-index: 9999;
+
+  white-space: nowrap;
+
+  animation: comboPop 1s forwards;
 }
 
+/* ===== COMBO ANIMATION ===== */
 @keyframes comboPop {
-  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-  100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
+
+  0% {
+    transform:
+      translate(-50%, -50%)
+      scale(0.3);
+
+    opacity: 0;
+  }
+
+  15% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.25);
+
+    opacity: 1;
+  }
+
+  70% {
+    transform:
+      translate(-50%, -90%)
+      scale(1);
+
+    opacity: 1;
+  }
+
+  100% {
+    transform:
+      translate(-50%, -140%)
+      scale(0.9);
+
+    opacity: 0;
+  }
 }
