@@ -6,6 +6,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   background-color: #0f0f12;
   background-image: 
     radial-gradient(circle at center, rgba(40, 40, 50, 0.8) 0%, rgba(10, 10, 15, 1) 100%),
@@ -15,36 +17,44 @@ body {
   color: #e0e0e0;
 }
 
-/* ===== TOP BAR STATS ===== */
-.stats, .topbar {
-  width: 95%;
-  max-width: 1300px;
-  background: linear-gradient(180deg, #2c2c2e 0%, #1a1a1c 100%);
-  border: 2px solid #4a4a4d;
-  border-radius: 60px;
-  padding: 15px 50px;
-  margin-bottom: 25px;
+/* ===== FIXED HUD (Top Right) ===== */
+.stats-hud {
+  position: fixed;
+  top: 25px;
+  right: 25px;
   display: flex;
-  justify-content: space-around;
-  font-size: 32px;
-  font-weight: bold;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.1);
-  box-sizing: border-box;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+  pointer-events: none;
 }
 
-#timer { color: #ff5e5e; text-shadow: 0 0 10px rgba(255,94,94,0.5); }
-#score { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.stat-item {
+  background: linear-gradient(180deg, #2c2c2e 0%, #1a1a1c 100%);
+  border: 2px solid #4a4a4d;
+  border-radius: 12px;
+  padding: 12px 25px;
+  min-width: 160px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #e0e0e0;
+  text-align: right;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
+}
 
-/* ===== GAME MAIN LAYOUT ===== */
+#timer { color: #ff5e5e; text-shadow: 0 0 10px rgba(255,94,94,0.5); margin-left: 10px; }
+#score { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); margin-left: 10px; }
+
+/* ===== GAME CONTAINERS ===== */
 #game-container {
   display: flex;
   justify-content: center;
   gap: 60px;
   width: 100%;
   max-width: 1600px;
+  margin-top: 20px;
 }
 
-/* ===== CONTAINERS ===== */
 #gemGrid, #cardGrid {
   width: 615px; 
   height: 615px;
@@ -55,10 +65,7 @@ body {
   box-sizing: border-box;
 }
 
-#gemGrid {
-  position: relative;
-  overflow: hidden;
-}
+#gemGrid { position: relative; overflow: hidden; }
 
 #cardGrid {
   display: grid;
@@ -69,7 +76,7 @@ body {
   align-content: center;
 }
 
-/* ===== PREMIUM JEWELS ===== */
+/* ===== PREMIUM JEWELS (HARDENED) ===== */
 .gem {
   position: absolute;
   width: 126px;
@@ -78,60 +85,38 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  
-  /* Start hidden for the spawn logic */
   top: -150px; 
   
-  /* Force onto GPU to prevent animation "sticking" */
-  transform: translateZ(0);
+  /* Performance Locks */
+  transform: translate3d(0, 0, 0);
+  will-change: top, left;
+  contain: layout style;
   backface-visibility: hidden;
   
-  /* The Shape */
   clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-  
-  /* Snappy Gravity Transitions */
-  transition-property: top, left, transform, filter, opacity;
-  transition-duration: 0.4s;
-  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: top;
-  
-  /* Premium Depth Effects */
-  box-shadow: 
-    inset 0 10px 15px rgba(255,255,255,0.3),
-    inset 0 -10px 15px rgba(0,0,0,0.5);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 5;
 }
 
-.gem::after {
-  content: "";
-  position: absolute;
-  top: 10%;
-  left: 20%;
-  width: 60%;
-  height: 30%;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+.gem[data-moving="true"] {
+  z-index: 10;
   pointer-events: none;
 }
 
-/* Richer Color Palette */
-.gem[data-color="red"] { border: 3px solid #ff4d4d; box-shadow: inset 0 0 20px #800000, 0 5px 15px rgba(255,0,0,0.3); }
-.gem[data-color="blue"] { border: 3px solid #3498db; box-shadow: inset 0 0 20px #001a4d, 0 5px 15px rgba(0,0,255,0.3); }
-.gem[data-color="green"] { border: 3px solid #2ecc71; box-shadow: inset 0 0 20px #002200, 0 5px 15px rgba(0,255,0,0.3); }
-.gem[data-color="purple"] { border: 3px solid #9b59b6; box-shadow: inset 0 0 20px #310054, 0 5px 15px rgba(155,0,255,0.3); }
-.gem[data-color="gold"] { border: 3px solid #f1c40f; box-shadow: inset 0 0 20px #5c4900, 0 5px 15px rgba(255,215,0,0.3); }
+/* Colors */
+.gem[data-color="red"] { border: 3px solid #ff4d4d; box-shadow: inset 0 0 20px #800000; }
+.gem[data-color="blue"] { border: 3px solid #3498db; box-shadow: inset 0 0 20px #001a4d; }
+.gem[data-color="green"] { border: 3px solid #2ecc71; box-shadow: inset 0 0 20px #002200; }
+.gem[data-color="purple"] { border: 3px solid #9b59b6; box-shadow: inset 0 0 20px #310054; }
+.gem[data-color="gold"] { border: 3px solid #f1c40f; box-shadow: inset 0 0 20px #5c4900; }
 
-/* Jewel Text Enhancement */
 .label {
-  font-family: 'Times New Roman', Times, serif;
   font-weight: 900;
   font-size: 15pt;
   text-transform: uppercase;
-  color: #ffffff !important;
+  color: #ffffff;
   text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
-  z-index: 2;
   pointer-events: none;
-  user-select: none;
 }
 
 /* ===== CARDS ===== */
@@ -147,47 +132,37 @@ body {
   font-size: 16pt;
   padding: 10px;
   font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.card:hover {
-  background: linear-gradient(135deg, #f3dec3 0%, #d4bc9c 100%);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.5);
-}
-
-/* ===== INTERACTION ===== */
+/* ===== EFFECTS ===== */
 .gem.selected, .card.selected {
   outline: 4px solid #ffffff;
   outline-offset: 2px;
-  filter: brightness(1.2) saturate(1.2);
-  box-shadow: 0 0 30px #ffffff;
-  z-index: 100;
+  filter: brightness(1.2);
   transform: scale(1.08);
+  z-index: 100;
 }
 
 .fade-out {
   opacity: 0;
   transform: scale(1.5);
-  filter: brightness(2);
   transition: all 0.4s ease-out;
 }
 
-/* ===== COMBO POPUP ===== */
 .combo-text {
   position: absolute;
   font-size: 50px;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+  text-shadow: 0 0 10px #ffd700;
   pointer-events: none;
   z-index: 1000;
-  animation: comboPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: comboPop 0.8s forwards;
 }
 
 @keyframes comboPop {
   0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-  50% { opacity: 1; transform: translate(-50%, -100%) scale(1.2); }
   100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
 }
