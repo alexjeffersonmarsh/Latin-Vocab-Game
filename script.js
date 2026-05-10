@@ -383,7 +383,7 @@ function handleWin() {
 
   isProcessing = true;
 
-  const timeBonus = timeLeft * 5;
+  const timeBonus = timeLeft * 25;
 
   setTimeout(() => {
 
