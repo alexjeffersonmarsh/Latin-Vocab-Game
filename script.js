@@ -41,6 +41,7 @@ const timerDisplay = document.getElementById("timer");
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playTone(freq, duration, type = "sine") {
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
@@ -48,6 +49,7 @@ function playTone(freq, duration, type = "sine") {
   osc.frequency.value = freq;
 
   gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
   gain.gain.exponentialRampToValueAtTime(
     0.01,
     audioCtx.currentTime + duration
@@ -73,10 +75,37 @@ function isAnyGemMoving() {
   return document.querySelector('.gem[data-moving="true"]');
 }
 
+// ===== DEBUG VALIDATOR =====
+function validateBoard() {
+
+  const seen = new Set();
+
+  for (let r = 0; r < rows; r++) {
+
+    for (let c = 0; c < cols; c++) {
+
+      const g = gemBoard[r][c];
+
+      if (!g) continue;
+
+      if (seen.has(g)) {
+        console.error("DUPLICATE GEM REFERENCE", g);
+      }
+
+      seen.add(g);
+
+      if (g.row !== r || g.col !== c) {
+        console.error("POSITION DESYNC", g, r, c);
+      }
+    }
+  }
+}
+
 // ===== LOAD VOCAB =====
 function loadVocabFromStorage() {
 
   const params = new URLSearchParams(window.location.search);
+
   const raw = params.get("list");
 
   if (!raw) return false;
@@ -112,7 +141,9 @@ function loadVocabFromStorage() {
 
 // ===== CORE UI =====
 function updateScore(val) {
+
   score += val;
+
   scoreDisplay.textContent = score;
 }
 
@@ -176,6 +207,7 @@ function createGemElement(g) {
   const label = document.createElement("span");
 
   label.className = "label";
+
   label.textContent = g.word;
 
   d.appendChild(label);
@@ -185,7 +217,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BOARD BUILDING =====
+// ===== BOARD BUILD =====
 function buildBoard() {
 
   gemBoard = Array.from(
@@ -359,7 +391,7 @@ function handleWin() {
   }, 600);
 }
 
-// ===== COMBO LOGIC =====
+// ===== COMBO TEXT =====
 function showComboText(mult) {
 
   const text = document.createElement("div");
@@ -371,27 +403,25 @@ function showComboText(mult) {
       ? "COMBO CLEAR!"
       : "x" + mult + " COMBO!";
 
-  // Strong positioning
   text.style.position = "absolute";
   text.style.left = "50%";
   text.style.top = "40%";
   text.style.transform = "translate(-50%, -50%)";
-
-  // Make sure it appears ABOVE gems
   text.style.zIndex = "9999";
-
-  // Prevent interaction weirdness
   text.style.pointerEvents = "none";
 
   gemGrid.appendChild(text);
 
   setTimeout(() => {
+
     if (text.parentNode) {
       text.remove();
     }
+
   }, 1000);
 }
 
+// ===== MATCH FINDER =====
 function findMatches() {
 
   const visited = Array.from(
@@ -399,7 +429,7 @@ function findMatches() {
     () => Array(cols).fill(false)
   );
 
-  const matches = [];
+  const matchSet = new Set();
 
   for (let r = 0; r < rows; r++) {
 
@@ -446,15 +476,16 @@ function findMatches() {
         }
 
         if (cluster.length >= 3) {
-          cluster.forEach(g => matches.push(g));
+          cluster.forEach(g => matchSet.add(g));
         }
       }
     }
   }
 
-  return matches;
+  return [...matchSet];
 }
 
+// ===== CLEAR MATCHES =====
 function clearMatches(matches) {
 
   if (!matches.length) return;
@@ -467,28 +498,38 @@ function clearMatches(matches) {
 
   comboMultiplier++;
 
-  matches.forEach(g => {
+  const matchSet = new Set(matches);
 
-    recyclePool.push({
-      id: g.id,
-      word: g.word,
-      definition: g.definition
-    });
+  for (let r = 0; r < rows; r++) {
 
-    const el = g.element;
+    for (let c = 0; c < cols; c++) {
 
-    el.classList.add("fade-out");
+      const g = gemBoard[r][c];
 
-    gemBoard[g.row][g.col] = null;
+      if (g && matchSet.has(g)) {
 
-    setTimeout(() => {
+        recyclePool.push({
+          id: g.id,
+          word: g.word,
+          definition: g.definition
+        });
 
-      if (el && el.parentNode) {
-        el.remove();
+        const el = g.element;
+
+        el.classList.add("fade-out");
+
+        gemBoard[r][c] = null;
+
+        setTimeout(() => {
+
+          if (el && el.parentNode) {
+            el.remove();
+          }
+
+        }, CLEAR_TIME);
       }
-
-    }, CLEAR_TIME);
-  });
+    }
+  }
 }
 
 // ===== GRAVITY =====
@@ -531,7 +572,8 @@ function refillFromRecycle() {
 
   for (let c = 0; c < cols; c++) {
 
-    for (let r = rows - 1; r >= 0; r--) {
+    // IMPORTANT: TOP DOWN
+    for (let r = 0; r < rows; r++) {
 
       if (
         !gemBoard[r][c] &&
@@ -592,6 +634,8 @@ async function resolveBoard() {
 
   while (true) {
 
+    validateBoard();
+
     applyGravity();
 
     await wait(FALL_TIME);
@@ -599,6 +643,8 @@ async function resolveBoard() {
     refillFromRecycle();
 
     await wait(FALL_TIME);
+
+    validateBoard();
 
     const matches = findMatches();
 
@@ -608,6 +654,8 @@ async function resolveBoard() {
 
     clearMatches(matches);
 
+    // IMPORTANT:
+    // Gives combo text time to appear
     await wait(CLEAR_TIME + 250);
   }
 
