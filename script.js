@@ -169,7 +169,7 @@ function startTimer() {
   }, 1000);
 }
 
-// ===== POSITIONING =====
+// ===== POSITION GEM =====
 function positionGem(g) {
 
   if (!g || !g.element) return;
@@ -177,10 +177,10 @@ function positionGem(g) {
   const xOffset = 147;
   const yOffset = 119;
 
-  g.element.setAttribute("data-moving", "true");
-
   const x = g.col * xOffset;
   const y = g.row * yOffset;
+
+  g.element.setAttribute("data-moving", "true");
 
   g.element.style.transform =
     `translate(${x}px, ${y}px)`;
@@ -220,7 +220,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BOARD BUILD =====
+// ===== BUILD BOARD =====
 function buildBoard() {
 
   gemBoard = Array.from(
@@ -253,9 +253,9 @@ function buildBoard() {
 
       g.element = createGemElement(g);
 
-      positionGem(g);
-
       gemGrid.appendChild(g.element);
+
+      positionGem(g);
 
       gemBoard[r][c] = g;
     }
@@ -383,6 +383,7 @@ function handleWin() {
 
   isProcessing = true;
 
+  // Increased time bonus
   const timeBonus = timeLeft * 25;
 
   setTimeout(() => {
@@ -406,13 +407,6 @@ function showComboText(mult) {
       ? "COMBO CLEAR!"
       : "x" + mult + " COMBO!";
 
-  text.style.position = "absolute";
-  text.style.left = "50%";
-  text.style.top = "40%";
-  text.style.transform = "translate(-50%, -50%)";
-  text.style.zIndex = "9999";
-  text.style.pointerEvents = "none";
-
   gemGrid.appendChild(text);
 
   setTimeout(() => {
@@ -424,7 +418,7 @@ function showComboText(mult) {
   }, 1000);
 }
 
-// ===== MATCH FINDER =====
+// ===== FIND MATCHES =====
 function findMatches() {
 
   const visited = Array.from(
@@ -535,7 +529,7 @@ function clearMatches(matches) {
   }
 }
 
-// ===== GRAVITY =====
+// ===== APPLY GRAVITY =====
 function applyGravity() {
 
   for (let c = 0; c < cols; c++) {
@@ -551,7 +545,6 @@ function applyGravity() {
         if (r !== writeRow) {
 
           gemBoard[writeRow][c] = g;
-
           gemBoard[r][c] = null;
 
           g.row = writeRow;
@@ -575,7 +568,6 @@ function refillFromRecycle() {
 
   for (let c = 0; c < cols; c++) {
 
-    // IMPORTANT: TOP DOWN
     for (let r = 0; r < rows; r++) {
 
       if (
@@ -601,16 +593,12 @@ function refillFromRecycle() {
 
         g.element.style.transition = "none";
 
-        g.element.style.left =
-          (c * 147) + "px";
-
-        g.element.style.top = "-150px";
+        g.element.style.transform =
+          `translate(${c * 147}px, -150px)`;
 
         gemGrid.appendChild(g.element);
 
         void g.element.offsetHeight;
-
-        gemBoard[r][c] = g;
 
         setTimeout(() => {
 
@@ -619,6 +607,9 @@ function refillFromRecycle() {
           g.element.style.transition = "";
 
           g.row = r;
+          g.col = c;
+
+          gemBoard[r][c] = g;
 
           positionGem(g);
 
@@ -657,8 +648,6 @@ async function resolveBoard() {
 
     clearMatches(matches);
 
-    // IMPORTANT:
-    // Gives combo text time to appear
     await wait(CLEAR_TIME + 250);
   }
 
