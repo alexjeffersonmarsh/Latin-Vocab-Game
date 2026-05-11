@@ -1,40 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Vocabulary Jewel Game</title>
-    
-    <!-- ✅ FIX 1: The proper way to link your CSS file -->
+
+    <!-- STYLES -->
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
-    <div class="stats">
-        <div>Score: <span id="score">0</span></div>
-        <div>Time: <span id="timer">180</span>s</div>
+    <!-- ===== FIXED HUD ===== -->
+    <div class="stats-hud">
+
+        <div class="stat-item">
+            SCORE:
+            <span id="score">0</span>
+        </div>
+
+        <div class="stat-item">
+            TIME:
+            <span id="timer">180</span>
+        </div>
+
     </div>
 
-<div id="game-container">
+    <!-- ===== MAIN GAME ===== -->
+    <div id="game-container">
 
-  <!-- LEFT SIDE (JEWELS) -->
-  <div class="board-column">
-    <h3>Words</h3>
-    <div id="gemGrid"></div>
-  </div>
+        <!-- LEFT SIDE -->
+        <div class="board-column">
 
-  <!-- RIGHT SIDE (CARDS) -->
-  <div class="board-column">
-    <h3>Definitions</h3>
-    <div id="cardGrid"></div>
-  </div>
+            <h3>Words</h3>
 
-</div>
+            <div id="gemGrid"></div>
 
-    <!-- ✅ FIX 2: The proper way to load your JavaScript -->
-    <!-- This must be at the bottom, just before the closing body tag -->
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="board-column">
+
+            <h3>Definitions</h3>
+
+            <div id="cardGrid"></div>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
     <script src="script.js"></script>
 
 </body>
+
 </html>
