@@ -1,1 +1,23 @@
 
+[
+  { "word": "amicus", "definition": "friend" },
+  { "word": "bellum", "definition": "war" },
+  { "word": "aqua", "definition": "water" },
+  { "word": "ignis", "definition": "fire" },
+  { "word": "terra", "definition": "earth" },
+  { "word": "luna", "definition": "moon" },
+  { "word": "sol", "definition": "sun" },
+  { "word": "mare", "definition": "sea" },
+  { "word": "via", "definition": "road" },
+  { "word": "puer", "definition": "boy" },
+  { "word": "puella", "definition": "girl" },
+  { "word": "rex", "definition": "king" },
+  { "word": "regina", "definition": "queen" },
+  { "word": "domus", "definition": "house" },
+  { "word": "urbs", "definition": "city" },
+  { "word": "navis", "definition": "ship" },
+  { "word": "lex", "definition": "law" },
+  { "word": "hostis", "definition": "enemy" },
+  { "word": "virtus", "definition": "courage" },
+  { "word": "imperium", "definition": "command" }
+]
