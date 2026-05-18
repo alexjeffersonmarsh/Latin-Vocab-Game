@@ -1,38 +1,23 @@
 // ===== SETTINGS =====
-
 const rows = 5;
 const cols = 4;
 
 // ===== TIMING =====
-
 const FALL_TIME = 450;
 const CLEAR_TIME = 400;
 
 // ===== COLORS =====
-
 const colorMap = {
-
-  red:
-    "radial-gradient(circle at 30% 30%, #ff7e7e, #ff3e3e 70%, #a30000)",
-
-  blue:
-    "radial-gradient(circle at 30% 30%, #82ccdd, #0a3d62 70%, #062c43)",
-
-  green:
-    "radial-gradient(circle at 30% 30%, #a2ffaf, #27ae60 70%, #145a32)",
-
-  purple:
-    "radial-gradient(circle at 30% 30%, #d982ff, #8e44ad 70%, #4a235a)",
-
-  gold:
-    "radial-gradient(circle at 30% 30%, #ffeaa7, #f1c40f 70%, #967117)"
-
+  red: "radial-gradient(circle at 30% 30%, #ff7e7e, #ff3e3e 70%, #a30000)",
+  blue: "radial-gradient(circle at 30% 30%, #82ccdd, #0a3d62 70%, #062c43)",
+  green: "radial-gradient(circle at 30% 30%, #a2ffaf, #27ae60 70%, #145a32)",
+  purple: "radial-gradient(circle at 30% 30%, #d982ff, #8e44ad 70%, #4a235a)",
+  gold: "radial-gradient(circle at 30% 30%, #ffeaa7, #f1c40f 70%, #967117)"
 };
 
 const colors = Object.keys(colorMap);
 
 // ===== GAME STATE =====
-
 let score = 0;
 let timeLeft = 180;
 let timerInterval;
@@ -42,16 +27,14 @@ let isProcessing = false;
 
 let vocab = [];
 let fullVocab = [];
+let remainingVocab = [];   // ✅ NEW: tracks depletion
 
 let gemBoard = [];
 
 let selectedGem = null;
 let selectedCard = null;
 
-let recyclePool = [];
-
 // ===== DOM =====
-
 const gemGrid = document.getElementById("gemGrid");
 const cardGrid = document.getElementById("cardGrid");
 
@@ -59,12 +42,9 @@ const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
 
 // ===== AUDIO =====
-
-const audioCtx =
-  new (window.AudioContext || window.webkitAudioContext)();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playTone(freq, duration, type = "sine") {
-
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
@@ -72,7 +52,6 @@ function playTone(freq, duration, type = "sine") {
   osc.frequency.value = freq;
 
   gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-
   gain.gain.exponentialRampToValueAtTime(
     0.01,
     audioCtx.currentTime + duration
@@ -83,7 +62,6 @@ function playTone(freq, duration, type = "sine") {
 
   osc.start();
   osc.stop(audioCtx.currentTime + duration);
-
 }
 
 const playChime = () => playTone(600, 0.25);
@@ -91,21 +69,15 @@ const playBuzz = () => playTone(150, 0.3, "square");
 const playExplosion = () => playTone(90, 0.2);
 
 // ===== COMBO UI =====
-
 function showComboText(text) {
-
   const div = document.createElement("div");
   div.className = "combo-text";
   div.textContent = text;
-
   document.body.appendChild(div);
-
   setTimeout(() => div.remove(), 1000);
-
 }
 
 // ===== HELPERS =====
-
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -115,75 +87,40 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// VOCAB LOADER
+// VOCAB LOADER (FIXED: 20 WORDS ONLY)
 // =========================================
 
 async function loadVocab() {
 
-  const params = new URLSearchParams(window.location.search);
-
-  if (window.preloadedVocab && window.preloadedVocab.length) {
-
-    vocab = window.preloadedVocab.map((item, index) => ({
-      id: index + 1,
-      word: item.word,
-      definition: item.definition
-    }));
-
-    fullVocab = vocab.slice(0, rows * cols);
-    recyclePool = [...fullVocab];
-
-    return true;
+  if (!window.preloadedVocab || !window.preloadedVocab.length) {
+    alert("No Firebase vocabulary loaded.");
+    return false;
   }
 
-  const vocabPath = params.get("vocab");
+  vocab = window.preloadedVocab.map((item, index) => ({
+    id: index + 1,
+    word: item.word,
+    definition: item.definition
+  }));
 
-  if (vocabPath) {
+  // FIXED: exactly 20 words max
+  fullVocab = vocab.slice(0, 20);
+  remainingVocab = [...fullVocab];
 
-    try {
-
-      const response = await fetch(vocabPath);
-      const data = await response.json();
-
-      vocab = data.map((item, index) => ({
-        id: index + 1,
-        word: item.word,
-        definition: item.definition
-      }));
-
-      fullVocab = vocab.slice(0, rows * cols);
-      recyclePool = [...fullVocab];
-
-      return true;
-
-    } catch (e) {
-
-      console.error(e);
-      alert("Unable to load vocabulary file.");
-      return false;
-
-    }
-  }
-
-  alert("No vocabulary provided.");
-  return false;
+  return true;
 }
 
 // ===== SCORE =====
-
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
 }
 
 // ===== TIMER =====
-
 function startTimer() {
-
   clearInterval(timerInterval);
 
   timerInterval = setInterval(() => {
-
     timeLeft--;
     timerDisplay.textContent = timeLeft;
 
@@ -192,22 +129,17 @@ function startTimer() {
       isProcessing = true;
       alert("Time's up! Final score: " + score);
     }
-
   }, 1000);
-
 }
 
-// ===== POSITION =====
-
+// ===== POSITION GEM =====
 function positionGem(g) {
-
   if (!g || !g.element) return;
 
   const x = g.col * 147;
   const y = g.row * 119;
 
   g.element.setAttribute("data-moving", "true");
-
   g.element.style.transform = `translate(${x}px, ${y}px)`;
 
   setTimeout(() => {
@@ -215,15 +147,11 @@ function positionGem(g) {
       g.element.setAttribute("data-moving", "false");
     }
   }, FALL_TIME);
-
 }
 
 // ===== CREATE GEM =====
-
 function createGemElement(g) {
-
   const d = document.createElement("div");
-
   d.className = "gem";
   d.style.background = colorMap[g.color];
   d.dataset.color = g.color;
@@ -234,12 +162,10 @@ function createGemElement(g) {
 
   d.appendChild(label);
   d.onclick = () => selectGem(g);
-
   return d;
 }
 
-// ===== BOARD =====
-
+// ===== BOARD BUILD =====
 function buildBoard() {
 
   gemBoard = Array.from({ length: rows }, () =>
@@ -260,14 +186,12 @@ function buildBoard() {
 
       const g = {
         ...item,
-        id: item.id,
         color: colors[Math.floor(Math.random() * colors.length)],
         row: r,
         col: c
       };
 
       g.element = createGemElement(g);
-
       gemGrid.appendChild(g.element);
 
       positionGem(g);
@@ -277,8 +201,7 @@ function buildBoard() {
   }
 }
 
-// ===== CARDS =====
-
+// ===== CARD BUILD =====
 function buildCards() {
 
   cardGrid.innerHTML = "";
@@ -288,11 +211,9 @@ function buildCards() {
     .forEach(item => {
 
       const d = document.createElement("div");
-
       d.className = "card";
       d.textContent = item.definition;
       d.dataset.id = item.id;
-
       d.onclick = () => selectCard(d);
 
       cardGrid.appendChild(d);
@@ -301,10 +222,8 @@ function buildCards() {
 
 }
 
-// ===== SELECT =====
-
+// ===== SELECTION =====
 function selectGem(g) {
-
   if (isProcessing || isAnyGemMoving()) return;
 
   if (selectedGem) selectedGem.element.classList.remove("selected");
@@ -316,7 +235,6 @@ function selectGem(g) {
 }
 
 function selectCard(card) {
-
   if (isProcessing || isAnyGemMoving()) return;
 
   if (selectedCard) selectedCard.classList.remove("selected");
@@ -327,8 +245,7 @@ function selectCard(card) {
   tryMatch();
 }
 
-// ===== MATCH =====
-
+// ===== MATCH LOGIC =====
 function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
@@ -345,17 +262,12 @@ function tryMatch() {
 
         if (gemBoard[r][c] && gemBoard[r][c].id === mid) {
 
-          recyclePool.push({
-            id: gemBoard[r][c].id,
-            word: gemBoard[r][c].word,
-            definition: gemBoard[r][c].definition
-          });
-
           gemBoard[r][c].element.remove();
           gemBoard[r][c] = null;
 
+          // remove from remaining pool (DEPLETION MODEL)
+          remainingVocab = remainingVocab.filter(v => v.id !== mid);
         }
-
       }
     }
 
@@ -363,10 +275,8 @@ function tryMatch() {
     resolveBoard();
 
   } else {
-
     playBuzz();
     updateScore(-2);
-
   }
 
   if (selectedGem) selectedGem.element.classList.remove("selected");
@@ -377,13 +287,11 @@ function tryMatch() {
 }
 
 // ===== GRAVITY =====
-
 function applyGravity() {
 
   let moved = false;
 
   for (let c = 0; c < cols; c++) {
-
     for (let r = rows - 1; r >= 0; r--) {
 
       if (gemBoard[r][c] === null) {
@@ -402,61 +310,17 @@ function applyGravity() {
             positionGem(g);
 
             moved = true;
-
             break;
-
           }
-
         }
-
       }
-
     }
-
   }
 
   return moved;
 }
 
-// ===== REFILL =====
-
-function refillFromRecycle() {
-
-  for (let c = 0; c < cols; c++) {
-
-    for (let r = 0; r < rows; r++) {
-
-      if (gemBoard[r][c] === null) {
-
-        if (!recyclePool.length) continue;
-
-        const item = recyclePool.shift();
-
-        const g = {
-          ...item,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          row: r,
-          col: c
-        };
-
-        g.element = createGemElement(g);
-
-        gemGrid.appendChild(g.element);
-
-        gemBoard[r][c] = g;
-
-        positionGem(g);
-
-      }
-
-    }
-
-  }
-
-}
-
 // ===== MATCH DETECTION =====
-
 function findMatches() {
 
   const visited = Array.from({ length: rows }, () =>
@@ -515,7 +379,6 @@ function findMatches() {
 }
 
 // ===== CLEAR MATCHES =====
-
 function clearMatches(matches) {
 
   if (!matches.length) return;
@@ -523,7 +386,6 @@ function clearMatches(matches) {
   playExplosion();
 
   comboMultiplier++;
-
   updateScore(matches.length * 5 * comboMultiplier);
 
   if (comboMultiplier > 1) {
@@ -532,24 +394,15 @@ function clearMatches(matches) {
 
   matches.forEach(g => {
 
-    recyclePool.push({
-      id: g.id,
-      word: g.word,
-      definition: g.definition
-    });
-
     if (g.element) g.element.remove();
 
     if (gemBoard[g.row] && gemBoard[g.row][g.col] === g) {
       gemBoard[g.row][g.col] = null;
     }
-
   });
-
 }
 
 // ===== RESOLVE LOOP =====
-
 async function resolveBoard() {
 
   isProcessing = true;
@@ -557,7 +410,7 @@ async function resolveBoard() {
 
   while (true) {
 
-    // GRAVITY UNTIL STABLE
+    // gravity until stable
     let moved = true;
 
     while (moved) {
@@ -565,13 +418,18 @@ async function resolveBoard() {
       if (moved) await wait(FALL_TIME);
     }
 
-    refillFromRecycle();
-    await wait(FALL_TIME);
-    await wait(100);
-
     const matches = findMatches();
 
-    if (!matches.length) break;
+    if (!matches.length) {
+
+      // WIN CONDITION: full depletion
+      if (remainingVocab.length === 0) {
+        isProcessing = true;
+        alert("You cleared all vocabulary! Final score: " + score);
+      }
+
+      break;
+    }
 
     clearMatches(matches);
     await wait(CLEAR_TIME);
@@ -580,8 +438,7 @@ async function resolveBoard() {
   isProcessing = false;
 }
 
-// ===== START =====
-
+// ===== START GAME =====
 async function startLoadedGame() {
 
   score = 0;
@@ -590,13 +447,10 @@ async function startLoadedGame() {
   selectedGem = null;
   selectedCard = null;
 
-  recyclePool = [];
-
   scoreDisplay.textContent = 0;
   timerDisplay.textContent = 180;
 
   const loaded = await loadVocab();
-
   if (!loaded) return;
 
   buildBoard();
@@ -608,14 +462,16 @@ async function startLoadedGame() {
 
 window.startLoadedGame = startLoadedGame;
 
-// ===== AUTO START =====
-
+// ===== AUTO BOOT =====
 (async () => {
 
-  const params = new URLSearchParams(window.location.search);
+  let tries = 0;
 
-  if (params.get("id") || params.get("set")) return;
+  while (!window.preloadedVocab && tries < 30) {
+    await wait(200);
+    tries++;
+  }
 
-  if (params.get("vocab")) startLoadedGame();
+  startLoadedGame();
 
 })();
