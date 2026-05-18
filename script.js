@@ -486,6 +486,8 @@ function tryMatch() {
 
 function applyGravity() {
 
+  let moved = false;
+
   for (let c = 0; c < cols; c++) {
 
     for (let r = rows - 1; r >= 0; r--) {
@@ -505,6 +507,8 @@ function applyGravity() {
 
             positionGem(fallingGem);
 
+            moved = true;
+
             break;
 
           }
@@ -516,6 +520,8 @@ function applyGravity() {
     }
 
   }
+
+  return moved;
 
 }
 
@@ -600,25 +606,27 @@ async function resolveBoard() {
 
   comboMultiplier = 1;
 
-  while (true) {
+  // ===== KEEP DROPPING =====
 
-    applyGravity();
+  let moved = true;
 
-    await wait(FALL_TIME);
+  while (moved) {
 
-    refillFromRecycle();
+    moved = applyGravity();
 
-    await wait(FALL_TIME);
+    if (moved) {
 
-    const matches = findMatches();
+      await wait(FALL_TIME);
 
-    if (!matches.length) break;
-
-    clearMatches(matches);
-
-    await wait(CLEAR_TIME + 250);
+    }
 
   }
+
+  // ===== REFILL =====
+
+  refillFromRecycle();
+
+  await wait(FALL_TIME);
 
   isProcessing = false;
 
