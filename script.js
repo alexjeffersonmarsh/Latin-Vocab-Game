@@ -1,3 +1,4 @@
+
 // ===== SETTINGS =====
 const rows = 5;
 const cols = 4;
@@ -28,8 +29,8 @@ let isProcessing = false;
 let vocab = [];
 let fullVocab = [];
 
-let masteredVocab = [];   // permanent removals (player matches)
-let comboRecycle = [];    // stores ONLY IDs now
+let masteredVocab = [];
+let comboRecycle = [];
 
 let gemBoard = [];
 
@@ -88,7 +89,7 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// VOCAB LOADER (LIMIT 20)
+// VOCAB LOADER
 // =========================================
 
 async function loadVocab() {
@@ -165,7 +166,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BOARD BUILD =====
+// ===== BOARD =====
 function buildBoard() {
 
   gemBoard = Array.from({ length: rows }, () =>
@@ -221,7 +222,7 @@ function buildCards() {
     });
 }
 
-// ===== SELECTION =====
+// ===== MATCH =====
 function selectGem(g) {
   if (isProcessing || isAnyGemMoving()) return;
 
@@ -244,7 +245,6 @@ function selectCard(card) {
   tryMatch();
 }
 
-// ===== MATCH =====
 function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
@@ -369,7 +369,7 @@ function findMatches() {
   return [...new Set(matches)];
 }
 
-// ===== COMBO CLEAR (FIXED RECYCLING) =====
+// ===== COMBO CLEAR =====
 function clearMatches(matches) {
 
   if (!matches.length) return;
@@ -391,14 +391,13 @@ function clearMatches(matches) {
       gemBoard[g.row][g.col] = null;
     }
 
-    // ONLY store ID (FIXED)
     if (!masteredVocab.includes(g.id)) {
       comboRecycle.push(g.id);
     }
   });
 }
 
-// ===== COMBO REFILL (FIXED) =====
+// ===== COMBO REFILL =====
 function refillFromCombo() {
 
   for (let r = 0; r < rows; r++) {
@@ -407,7 +406,6 @@ function refillFromCombo() {
       if (!gemBoard[r][c] && comboRecycle.length) {
 
         const id = comboRecycle.pop();
-
         const base = fullVocab.find(v => v.id === id);
 
         if (!base) continue;
@@ -420,7 +418,6 @@ function refillFromCombo() {
         };
 
         g.element = createGemElement(g);
-
         gemGrid.appendChild(g.element);
 
         gemBoard[r][c] = g;
@@ -431,7 +428,7 @@ function refillFromCombo() {
   }
 }
 
-// ===== RESOLVE LOOP =====
+// ===== FIXED RESOLVE LOOP (NO STUCK TOP BUG) =====
 async function resolveBoard() {
 
   isProcessing = true;
@@ -448,6 +445,16 @@ async function resolveBoard() {
 
     refillFromCombo();
 
+    // 🔥 CRITICAL FIX: allow newly inserted gems to settle
+    await wait(FALL_TIME);
+
+    let postMove = true;
+
+    while (postMove) {
+      postMove = applyGravity();
+      if (postMove) await wait(FALL_TIME);
+    }
+
     const matches = findMatches();
 
     if (!matches.length) break;
@@ -459,7 +466,7 @@ async function resolveBoard() {
   isProcessing = false;
 }
 
-// ===== START GAME =====
+// ===== START =====
 async function startLoadedGame() {
 
   score = 0;
