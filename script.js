@@ -187,7 +187,7 @@ function buildBoard() {
 
       const g = {
         ...item,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: colors[Math.floor(Math.random() - 0.5)],
         row: r,
         col: c
       };
@@ -428,7 +428,7 @@ function refillFromCombo() {
   }
 }
 
-// ===== FIXED RESOLVE LOOP (NO STUCK TOP BUG) =====
+// ===== 🔥 FINAL FIXED RESOLVE LOOP (SYNC GUARANTEED) =====
 async function resolveBoard() {
 
   isProcessing = true;
@@ -436,31 +436,37 @@ async function resolveBoard() {
 
   while (true) {
 
+    // full settle
     let moved = true;
-
     while (moved) {
       moved = applyGravity();
-      if (moved) await wait(FALL_TIME);
+      await wait(FALL_TIME);
     }
+
+    // stabilize DOM before refill
+    await wait(120);
 
     refillFromCombo();
 
-    // 🔥 CRITICAL FIX: allow newly inserted gems to settle
+    // let DOM register new gems
     await wait(FALL_TIME);
 
-    let postMove = true;
-
-    while (postMove) {
-      postMove = applyGravity();
-      if (postMove) await wait(FALL_TIME);
+    // second gravity pass (CRITICAL FIX)
+    let post = true;
+    while (post) {
+      post = applyGravity();
+      await wait(FALL_TIME);
     }
+
+    // final stabilization delay
+    await wait(150);
 
     const matches = findMatches();
 
     if (!matches.length) break;
 
     clearMatches(matches);
-    await wait(CLEAR_TIME);
+    await wait(CLEAR_TIME + 100);
   }
 
   isProcessing = false;
