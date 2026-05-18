@@ -95,7 +95,6 @@ const playExplosion = () => playTone(90, 0.2);
 function showComboText(text) {
 
   const div = document.createElement("div");
-
   div.className = "combo-text";
   div.textContent = text;
 
@@ -123,7 +122,6 @@ async function loadVocab() {
 
   const params = new URLSearchParams(window.location.search);
 
-  // FIREBASE FIRST
   if (window.preloadedVocab && window.preloadedVocab.length) {
 
     vocab = window.preloadedVocab.map((item, index) => ({
@@ -138,7 +136,6 @@ async function loadVocab() {
     return true;
   }
 
-  // JSON FALLBACK
   const vocabPath = params.get("vocab");
 
   if (vocabPath) {
@@ -256,7 +253,6 @@ function buildBoard() {
   let i = 0;
 
   for (let r = 0; r < rows; r++) {
-
     for (let c = 0; c < cols; c++) {
 
       const item = items[i++];
@@ -364,7 +360,6 @@ function tryMatch() {
     }
 
     selectedCard.remove();
-
     resolveBoard();
 
   } else {
@@ -490,20 +485,16 @@ function findMatches() {
       if (!cell || cell.color !== color) continue;
 
       visited[cr][cc] = true;
-
       group.push(cell);
 
       stack.push([cr + 1, cc]);
       stack.push([cr - 1, cc]);
       stack.push([cr, cc + 1]);
       stack.push([cr, cc - 1]);
-
     }
-
   }
 
   for (let r = 0; r < rows; r++) {
-
     for (let c = 0; c < cols; c++) {
 
       const cell = gemBoard[r][c];
@@ -517,49 +508,6 @@ function findMatches() {
       if (group.length >= 3) {
         matches.push(...group);
       }
-
-    }
-
-  }
-
-  return [...new Set(matches)];
-
-}
-
-  // vertical
-  for (let c = 0; c < cols; c++) {
-
-    let streak = 1;
-
-    for (let r = 1; r < rows; r++) {
-
-      const a = gemBoard[r][c];
-      const b = gemBoard[r - 1][c];
-
-      if (a && b && a.color === b.color) {
-
-        streak++;
-
-      } else {
-
-        if (streak >= 3) {
-
-          for (let i = 0; i < streak; i++) {
-            matches.push(gemBoard[r - 1 - i][c]);
-          }
-
-        }
-
-        streak = 1;
-      }
-    }
-
-    if (streak >= 3) {
-
-      for (let i = 0; i < streak; i++) {
-        matches.push(gemBoard[rows - 1 - i][c]);
-      }
-
     }
   }
 
@@ -592,7 +540,9 @@ function clearMatches(matches) {
 
     if (g.element) g.element.remove();
 
-    gemBoard[g.row][g.col] = null;
+    if (gemBoard[g.row] && gemBoard[g.row][g.col] === g) {
+      gemBoard[g.row][g.col] = null;
+    }
 
   });
 
@@ -603,22 +553,21 @@ function clearMatches(matches) {
 async function resolveBoard() {
 
   isProcessing = true;
-
   comboMultiplier = 1;
 
   while (true) {
 
+    // GRAVITY UNTIL STABLE
     let moved = true;
 
     while (moved) {
-
       moved = applyGravity();
       if (moved) await wait(FALL_TIME);
-
     }
 
     refillFromRecycle();
     await wait(FALL_TIME);
+    await wait(100);
 
     const matches = findMatches();
 
@@ -626,26 +575,12 @@ async function resolveBoard() {
 
     clearMatches(matches);
     await wait(CLEAR_TIME);
-
   }
 
   isProcessing = false;
 }
 
-// ===== COMBO UI =====
-
-function showComboText(text) {
-
-  const div = document.createElement("div");
-  div.className = "combo-text";
-  div.textContent = text;
-
-  document.body.appendChild(div);
-
-  setTimeout(() => div.remove(), 1000);
-}
-
-// ===== START GAME =====
+// ===== START =====
 
 async function startLoadedGame() {
 
