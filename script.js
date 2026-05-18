@@ -1,3 +1,4 @@
+
 // ===== SETTINGS =====
 const rows = 5;
 const cols = 4;
@@ -73,14 +74,14 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// ✅ NEW UNIVERSAL VOCAB LOADER
+// ✅ VOCAB LOADER
 // =========================================
 
 async function loadVocab() {
 
   const params = new URLSearchParams(window.location.search);
 
-  // ✅ PRIORITY 1: Firebase (teacher links)
+  // ✅ PRIORITY 1: Firebase
   if (window.preloadedVocab && window.preloadedVocab.length) {
 
     vocab = window.preloadedVocab.map((item, index) => ({
@@ -93,7 +94,7 @@ async function loadVocab() {
     return true;
   }
 
-  // ✅ PRIORITY 2: legacy JSON support
+  // ✅ PRIORITY 2: JSON
   const vocabPath = params.get("vocab");
 
   if (vocabPath) {
@@ -123,6 +124,7 @@ async function loadVocab() {
 }
 
 // ===== CORE UI =====
+
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
@@ -143,6 +145,7 @@ function startTimer() {
 }
 
 // ===== POSITION GEM =====
+
 function positionGem(g) {
   if (!g || !g.element) return;
 
@@ -178,6 +181,7 @@ function createGemElement(g) {
 }
 
 // ===== BUILD BOARD =====
+
 function buildBoard() {
   gemBoard = Array.from({ length: rows }, () => Array(cols).fill(null));
   gemGrid.innerHTML = "";
@@ -212,6 +216,7 @@ function buildCards() {
 }
 
 // ===== INTERACTION =====
+
 function selectGem(g) {
   if (isProcessing || isAnyGemMoving()) return;
 
@@ -231,6 +236,7 @@ function selectCard(card) {
 }
 
 // ===== MATCH LOGIC =====
+
 function tryMatch() {
   if (!selectedGem || !selectedCard) return;
 
@@ -263,6 +269,7 @@ function tryMatch() {
 }
 
 // ===== RESOLVE LOOP =====
+
 async function resolveBoard() {
   isProcessing = true;
   comboMultiplier = 1;
@@ -283,17 +290,21 @@ async function resolveBoard() {
   isProcessing = false;
 }
 
-// ===== INIT =====
+// ✅ ✅ FIXED INIT (only change)
 (async function initGame() {
 
-  // ✅ WAIT for Firebase to populate window.preloadedVocab
-  await new Promise(resolve => setTimeout(resolve, 200));
+  let attempts = 0;
+
+  // ✅ Wait until Firebase finishes loading
+  while ((!window.preloadedVocab || window.preloadedVocab.length === 0) && attempts < 15) {
+      await wait(200);
+      attempts++;
+  }
 
   if (await loadVocab()) {
-    buildBoard();
-    buildCards();
-    startTimer();
+      buildBoard();
+      buildCards();
+      startTimer();
   }
 
 })();
-``
