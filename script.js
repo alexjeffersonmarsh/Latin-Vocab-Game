@@ -1,4 +1,3 @@
-
 // ===== SETTINGS =====
 const rows = 5;
 const cols = 4;
@@ -29,8 +28,8 @@ let isProcessing = false;
 let vocab = [];
 let fullVocab = [];
 
-let masteredVocab = [];
-let comboRecycle = [];
+let masteredVocab = [];   // permanent removals (player matches)
+let comboRecycle = [];    // stores ONLY IDs now
 
 let gemBoard = [];
 
@@ -89,7 +88,7 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// VOCAB
+// VOCAB LOADER (LIMIT 20)
 // =========================================
 
 async function loadVocab() {
@@ -113,12 +112,13 @@ async function loadVocab() {
   return true;
 }
 
-// ===== SCORE / TIMER =====
+// ===== SCORE =====
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
 }
 
+// ===== TIMER =====
 function startTimer() {
   clearInterval(timerInterval);
 
@@ -149,7 +149,7 @@ function positionGem(g) {
   }, FALL_TIME);
 }
 
-// ===== GEM CREATION =====
+// ===== GEM =====
 function createGemElement(g) {
   const d = document.createElement("div");
   d.className = "gem";
@@ -165,7 +165,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BOARD =====
+// ===== BOARD BUILD =====
 function buildBoard() {
 
   gemBoard = Array.from({ length: rows }, () =>
@@ -193,8 +193,10 @@ function buildBoard() {
 
       g.element = createGemElement(g);
       gemGrid.appendChild(g.element);
-      positionGem(g);
+
       gemBoard[r][c] = g;
+
+      positionGem(g);
     }
   }
 }
@@ -219,7 +221,7 @@ function buildCards() {
     });
 }
 
-// ===== MATCHING =====
+// ===== SELECTION =====
 function selectGem(g) {
   if (isProcessing || isAnyGemMoving()) return;
 
@@ -242,6 +244,7 @@ function selectCard(card) {
   tryMatch();
 }
 
+// ===== MATCH =====
 function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
@@ -273,8 +276,8 @@ function tryMatch() {
     updateScore(-2);
   }
 
-  if (selectedGem) selectedGem.element.classList.remove("selected");
-  if (selectedCard) selectedCard.classList.remove("selected");
+  selectedGem?.element.classList.remove("selected");
+  selectedCard?.classList.remove("selected");
 
   selectedGem = null;
   selectedCard = null;
@@ -366,7 +369,7 @@ function findMatches() {
   return [...new Set(matches)];
 }
 
-// ===== COMBO CLEAR =====
+// ===== COMBO CLEAR (FIXED RECYCLING) =====
 function clearMatches(matches) {
 
   if (!matches.length) return;
@@ -388,17 +391,14 @@ function clearMatches(matches) {
       gemBoard[g.row][g.col] = null;
     }
 
+    // ONLY store ID (FIXED)
     if (!masteredVocab.includes(g.id)) {
-      comboRecycle.push({
-        id: g.id,
-        word: g.word,
-        definition: g.definition
-      });
+      comboRecycle.push(g.id);
     }
   });
 }
 
-// ===== COMBO REFILL =====
+// ===== COMBO REFILL (FIXED) =====
 function refillFromCombo() {
 
   for (let r = 0; r < rows; r++) {
@@ -406,62 +406,27 @@ function refillFromCombo() {
 
       if (!gemBoard[r][c] && comboRecycle.length) {
 
-        const item = comboRecycle.pop();
+        const id = comboRecycle.pop();
+
+        const base = fullVocab.find(v => v.id === id);
+
+        if (!base) continue;
 
         const g = {
-          ...item,
+          ...base,
           color: colors[Math.floor(Math.random() * colors.length)],
           row: r,
           col: c
         };
 
         g.element = createGemElement(g);
+
         gemGrid.appendChild(g.element);
 
         gemBoard[r][c] = g;
+
         positionGem(g);
       }
-    }
-  }
-}
-
-// ===== STUCK DETECTION + RESHUFFLE =====
-function hasMoves() {
-  const colorsFlat = gemBoard.flat().filter(Boolean).map(g => g.color);
-  const unique = new Set(colorsFlat);
-  return unique.size >= 2; // simple heuristic
-}
-
-function reshuffleBoard() {
-
-  const allGems = gemBoard.flat().filter(Boolean);
-
-  const pool = [...allGems, ...comboRecycle];
-
-  comboRecycle = [];
-
-  pool.sort(() => Math.random() - 0.5);
-
-  gemBoard = Array.from({ length: rows }, () => Array(cols).fill(null));
-
-  let i = 0;
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-
-      const item = pool[i++];
-      if (!item) continue;
-
-      item.row = r;
-      item.col = c;
-
-      if (!item.element) item.element = createGemElement(item);
-
-      gemGrid.appendChild(item.element);
-
-      gemBoard[r][c] = item;
-
-      positionGem(item);
     }
   }
 }
@@ -485,23 +450,7 @@ async function resolveBoard() {
 
     const matches = findMatches();
 
-    if (!matches.length) {
-
-      // 🔥 STUCK DETECTION
-      if (!hasMoves()) {
-        reshuffleBoard();
-        await wait(FALL_TIME);
-        continue;
-      }
-
-      const anyLeft = gemBoard.some(r => r.some(c => c));
-
-      if (!anyLeft) {
-        alert("You cleared all vocabulary! Final score: " + score);
-      }
-
-      break;
-    }
+    if (!matches.length) break;
 
     clearMatches(matches);
     await wait(CLEAR_TIME);
@@ -510,7 +459,7 @@ async function resolveBoard() {
   isProcessing = false;
 }
 
-// ===== START =====
+// ===== START GAME =====
 async function startLoadedGame() {
 
   score = 0;
