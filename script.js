@@ -27,7 +27,6 @@ let isProcessing = false;
 
 let vocab = [];
 let fullVocab = [];
-let remainingVocab = [];   // ✅ NEW: tracks depletion
 
 let gemBoard = [];
 
@@ -37,7 +36,6 @@ let selectedCard = null;
 // ===== DOM =====
 const gemGrid = document.getElementById("gemGrid");
 const cardGrid = document.getElementById("cardGrid");
-
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
 
@@ -87,7 +85,7 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// VOCAB LOADER (FIXED: 20 WORDS ONLY)
+// VOCAB LOADER (20 WORDS ONLY)
 // =========================================
 
 async function loadVocab() {
@@ -103,9 +101,7 @@ async function loadVocab() {
     definition: item.definition
   }));
 
-  // FIXED: exactly 20 words max
   fullVocab = vocab.slice(0, 20);
-  remainingVocab = [...fullVocab];
 
   return true;
 }
@@ -132,7 +128,7 @@ function startTimer() {
   }, 1000);
 }
 
-// ===== POSITION GEM =====
+// ===== POSITION =====
 function positionGem(g) {
   if (!g || !g.element) return;
 
@@ -165,7 +161,7 @@ function createGemElement(g) {
   return d;
 }
 
-// ===== BOARD BUILD =====
+// ===== BOARD =====
 function buildBoard() {
 
   gemBoard = Array.from({ length: rows }, () =>
@@ -201,7 +197,7 @@ function buildBoard() {
   }
 }
 
-// ===== CARD BUILD =====
+// ===== CARDS =====
 function buildCards() {
 
   cardGrid.innerHTML = "";
@@ -245,7 +241,7 @@ function selectCard(card) {
   tryMatch();
 }
 
-// ===== MATCH LOGIC =====
+// ===== MATCH =====
 function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
@@ -261,12 +257,8 @@ function tryMatch() {
       for (let c = 0; c < cols; c++) {
 
         if (gemBoard[r][c] && gemBoard[r][c].id === mid) {
-
           gemBoard[r][c].element.remove();
           gemBoard[r][c] = null;
-
-          // remove from remaining pool (DEPLETION MODEL)
-          remainingVocab = remainingVocab.filter(v => v.id !== mid);
         }
       }
     }
@@ -286,33 +278,33 @@ function tryMatch() {
   selectedCard = null;
 }
 
-// ===== GRAVITY =====
+// ===== GRAVITY (FIXED) =====
 function applyGravity() {
 
   let moved = false;
 
   for (let c = 0; c < cols; c++) {
+
+    let writeRow = rows - 1;
+
     for (let r = rows - 1; r >= 0; r--) {
 
-      if (gemBoard[r][c] === null) {
+      if (gemBoard[r][c] !== null) {
 
-        for (let rr = r - 1; rr >= 0; rr--) {
+        if (r !== writeRow) {
 
-          if (gemBoard[rr][c]) {
+          const g = gemBoard[r][c];
 
-            const g = gemBoard[rr][c];
+          gemBoard[writeRow][c] = g;
+          gemBoard[r][c] = null;
 
-            gemBoard[r][c] = g;
-            gemBoard[rr][c] = null;
+          g.row = writeRow;
+          positionGem(g);
 
-            g.row = r;
-
-            positionGem(g);
-
-            moved = true;
-            break;
-          }
+          moved = true;
         }
+
+        writeRow--;
       }
     }
   }
@@ -410,7 +402,6 @@ async function resolveBoard() {
 
   while (true) {
 
-    // gravity until stable
     let moved = true;
 
     while (moved) {
@@ -422,9 +413,11 @@ async function resolveBoard() {
 
     if (!matches.length) {
 
-      // WIN CONDITION: full depletion
-      if (remainingVocab.length === 0) {
-        isProcessing = true;
+      const anyLeft = gemBoard.some(row =>
+        row.some(cell => cell !== null)
+      );
+
+      if (!anyLeft) {
         alert("You cleared all vocabulary! Final score: " + score);
       }
 
@@ -438,7 +431,7 @@ async function resolveBoard() {
   isProcessing = false;
 }
 
-// ===== START GAME =====
+// ===== START =====
 async function startLoadedGame() {
 
   score = 0;
