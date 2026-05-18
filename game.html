@@ -4,22 +4,17 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Vocabulary Jewel Game</title>
 
-<!-- STYLES -->
 <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<!-- ===== FIXED HUD ===== -->
+<!-- ===== HUD ===== -->
 <div class="stats-hud">
 
     <div class="stat-item">
@@ -34,31 +29,23 @@
 
 </div>
 
-<!-- ===== MAIN GAME ===== -->
+<!-- ===== GAME AREA ===== -->
 <div id="game-container">
 
-    <!-- LEFT SIDE -->
     <div class="board-column">
-
         <h3>Words</h3>
-
         <div id="gemGrid"></div>
-
     </div>
 
-    <!-- RIGHT SIDE -->
     <div class="board-column">
-
         <h3>Definitions</h3>
-
         <div id="cardGrid"></div>
-
     </div>
 
 </div>
 
 <!-- =========================================
-     FIREBASE LOADER (ADDED)
+     FIREBASE LOADER (FIXED)
 ========================================= -->
 
 <script type="module">
@@ -73,20 +60,16 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ✅ SAME CONFIG AS EVERYTHING ELSE
 const firebaseConfig = {
   apiKey: "AIzaSyD-goTprU8NMVqmsAlve6BAfXrPZN-sQdQ",
   authDomain: "bubbleword-30367.firebaseapp.com",
-  projectId: "bubbleword-30367",
-  storageBucket: "bubbleword-30367.firebasestorage.app",
-  messagingSenderId: "1058393039019",
-  appId: "1:1058393039019:web:72ffaf6dab677b9a3657ee"
+  projectId: "bubbleword-30367"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ✅ Load vocab from Firebase
+// ✅ FIXED loader
 async function loadSet(setId) {
 
     const ref = doc(db, "vocabSets", setId);
@@ -97,10 +80,22 @@ async function loadSet(setId) {
         return [];
     }
 
-    return snapshot.data().terms;
+    let terms = snapshot.data().terms;
+
+    // ✅ CRITICAL FIX: handle string storage
+    if (typeof terms === "string") {
+        try {
+            terms = JSON.parse(terms);
+        } catch (e) {
+            console.error("Parse error:", e);
+            terms = [];
+        }
+    }
+
+    return terms;
 }
 
-// ✅ Read URL param
+// ✅ URL param
 const params = new URLSearchParams(window.location.search);
 const setId = params.get("id");
 
@@ -116,18 +111,9 @@ if (setId) {
 
         console.log("GemWord vocab loaded:", window.preloadedVocab);
 
-        // ✅ START GAME AFTER DATA LOAD
-        if (window.initGameWithData) {
-
-            window.initGameWithData(window.preloadedVocab);
-
-        } else {
-
-            // fallback: let script.js pick it up
-            window.customVocabReady = true;
-
-        }
-
+    }).catch(err => {
+        console.error(err);
+        alert("Could not load vocabulary set.");
     });
 
 }
@@ -141,5 +127,4 @@ if (setId) {
 <script src="script.js"></script>
 
 </body>
-
 </html>
