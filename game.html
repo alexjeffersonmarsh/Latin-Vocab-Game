@@ -3,62 +3,142 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Vocabulary Jewel Game</title>
+<title>Vocabulary Jewel Game</title>
 
-    <!-- STYLES -->
-    <link rel="stylesheet" href="style.css">
+<!-- STYLES -->
+<link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-    <!-- ===== FIXED HUD ===== -->
-    <div class="stats-hud">
+<!-- ===== FIXED HUD ===== -->
+<div class="stats-hud">
 
-        <div class="stat-item">
-            SCORE:
-            <span id="score">0</span>
-        </div>
+    <div class="stat-item">
+        SCORE:
+        <span id="score">0</span>
+    </div>
 
-        <div class="stat-item">
-            TIME:
-            <span id="timer">180</span>
-        </div>
+    <div class="stat-item">
+        TIME:
+        <span id="timer">180</span>
+    </div>
+
+</div>
+
+<!-- ===== MAIN GAME ===== -->
+<div id="game-container">
+
+    <!-- LEFT SIDE -->
+    <div class="board-column">
+
+        <h3>Words</h3>
+
+        <div id="gemGrid"></div>
 
     </div>
 
-    <!-- ===== MAIN GAME ===== -->
-    <div id="game-container">
+    <!-- RIGHT SIDE -->
+    <div class="board-column">
 
-        <!-- LEFT SIDE -->
-        <div class="board-column">
+        <h3>Definitions</h3>
 
-            <h3>Words</h3>
-
-            <div id="gemGrid"></div>
-
-        </div>
-
-        <!-- RIGHT SIDE -->
-        <div class="board-column">
-
-            <h3>Definitions</h3>
-
-            <div id="cardGrid"></div>
-
-        </div>
+        <div id="cardGrid"></div>
 
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script src="script.js"></script>
+</div>
+
+<!-- =========================================
+     FIREBASE LOADER (ADDED)
+========================================= -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    doc,
+    getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ✅ SAME CONFIG AS EVERYTHING ELSE
+const firebaseConfig = {
+  apiKey: "AIzaSyD-goTprU8NMVqmsAlve6BAfXrPZN-sQdQ",
+  authDomain: "bubbleword-30367.firebaseapp.com",
+  projectId: "bubbleword-30367",
+  storageBucket: "bubbleword-30367.firebasestorage.app",
+  messagingSenderId: "1058393039019",
+  appId: "1:1058393039019:web:72ffaf6dab677b9a3657ee"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ✅ Load vocab from Firebase
+async function loadSet(setId) {
+
+    const ref = doc(db, "vocabSets", setId);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+        alert("Vocabulary set not found.");
+        return [];
+    }
+
+    return snapshot.data().terms;
+}
+
+// ✅ Read URL param
+const params = new URLSearchParams(window.location.search);
+const setId = params.get("id");
+
+if (setId) {
+
+    loadSet(setId).then(data => {
+
+        // ✅ Convert to game format
+        window.preloadedVocab = data.map(v => ({
+            word: v.word,
+            definition: v.meaning
+        }));
+
+        console.log("GemWord vocab loaded:", window.preloadedVocab);
+
+        // ✅ START GAME AFTER DATA LOAD
+        if (window.initGameWithData) {
+
+            window.initGameWithData(window.preloadedVocab);
+
+        } else {
+
+            // fallback: let script.js pick it up
+            window.customVocabReady = true;
+
+        }
+
+    });
+
+}
+
+</script>
+
+<!-- =========================================
+     GAME SCRIPT
+========================================= -->
+
+<script src="script.js"></script>
 
 </body>
 
