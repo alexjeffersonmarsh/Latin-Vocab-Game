@@ -72,21 +72,18 @@ function isAnyGemMoving() {
   return document.querySelector('.gem[data-moving="true"]');
 }
 
-// ===== LOAD VOCAB FROM URL =====
-async function loadVocabFromURL() {
+// =========================================
+// ✅ NEW UNIVERSAL VOCAB LOADER
+// =========================================
+
+async function loadVocab() {
+
   const params = new URLSearchParams(window.location.search);
-  const vocabPath = params.get("vocab");
 
-  if (!vocabPath) {
-    alert("No vocabulary file specified.");
-    return false;
-  }
+  // ✅ PRIORITY 1: Firebase (teacher links)
+  if (window.preloadedVocab && window.preloadedVocab.length) {
 
-  try {
-    const response = await fetch(vocabPath);
-    const data = await response.json();
-
-    vocab = data.map((item, index) => ({
+    vocab = window.preloadedVocab.map((item, index) => ({
       id: index + 1,
       word: item.word,
       definition: item.definition
@@ -94,11 +91,35 @@ async function loadVocabFromURL() {
 
     fullVocab = vocab.slice(0, 20);
     return true;
-  } catch (e) {
-    console.error(e);
-    alert("Unable to load vocabulary file.");
-    return false;
   }
+
+  // ✅ PRIORITY 2: legacy JSON support
+  const vocabPath = params.get("vocab");
+
+  if (vocabPath) {
+
+    try {
+      const response = await fetch(vocabPath);
+      const data = await response.json();
+
+      vocab = data.map((item, index) => ({
+        id: index + 1,
+        word: item.word,
+        definition: item.definition
+      }));
+
+      fullVocab = vocab.slice(0, 20);
+      return true;
+
+    } catch (e) {
+      console.error(e);
+      alert("Unable to load vocabulary file.");
+      return false;
+    }
+  }
+
+  alert("No vocabulary provided.");
+  return false;
 }
 
 // ===== CORE UI =====
@@ -241,129 +262,6 @@ function tryMatch() {
   selectedCard = null;
 }
 
-// ===== COMBO TEXT =====
-function showComboText(mult) {
-  const text = document.createElement("div");
-  text.className = "combo-text";
-  text.textContent = mult < 2 ? "COMBO CLEAR!" : `x${mult} COMBO!`;
-  gemGrid.appendChild(text);
-
-  setTimeout(() => text.remove(), 1000);
-}
-
-// ===== FIND MATCHES =====
-function findMatches() {
-  const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-  const matchSet = new Set();
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (gemBoard[r][c] && !visited[r][c]) {
-        const color = gemBoard[r][c].color;
-        const stack = [[r, c]];
-        const cluster = [];
-        visited[r][c] = true;
-
-        while (stack.length) {
-          const [cr, cc] = stack.pop();
-          cluster.push(gemBoard[cr][cc]);
-
-          [[cr-1,cc],[cr+1,cc],[cr,cc-1],[cr,cc+1]].forEach(([nr,nc]) => {
-            if (
-              nr >= 0 && nr < rows &&
-              nc >= 0 && nc < cols &&
-              !visited[nr][nc] &&
-              gemBoard[nr][nc] &&
-              gemBoard[nr][nc].color === color
-            ) {
-              visited[nr][nc] = true;
-              stack.push([nr,nc]);
-            }
-          });
-        }
-
-        if (cluster.length >= 3) {
-          cluster.forEach(g => matchSet.add(g));
-        }
-      }
-    }
-  }
-
-  return [...matchSet];
-}
-
-// ===== CLEAR MATCHES =====
-function clearMatches(matches) {
-  if (!matches.length) return;
-
-  playExplosion();
-  updateScore(20 * comboMultiplier);
-  showComboText(comboMultiplier);
-  comboMultiplier++;
-
-  const matchSet = new Set(matches);
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const g = gemBoard[r][c];
-      if (g && matchSet.has(g)) {
-        recyclePool.push({ id:g.id, word:g.word, definition:g.definition });
-        g.element.classList.add("fade-out");
-        gemBoard[r][c] = null;
-        setTimeout(() => g.element.remove(), CLEAR_TIME);
-      }
-    }
-  }
-}
-
-// ===== APPLY GRAVITY =====
-function applyGravity() {
-  for (let c = 0; c < cols; c++) {
-    let writeRow = rows - 1;
-
-    for (let r = rows - 1; r >= 0; r--) {
-      const g = gemBoard[r][c];
-      if (g) {
-        if (r !== writeRow) {
-          gemBoard[writeRow][c] = g;
-          gemBoard[r][c] = null;
-          g.row = writeRow;
-          g.col = c;
-          positionGem(g);
-        }
-        writeRow--;
-      }
-    }
-  }
-}
-
-// ===== REFILL =====
-function refillFromRecycle() {
-  for (let c = 0; c < cols; c++) {
-    for (let r = 0; r < rows; r++) {
-      if (!gemBoard[r][c] && recyclePool.length) {
-        const item = recyclePool.shift();
-        const color = colors[Math.floor(Math.random() * colors.length)];
-
-        const g = { ...item, color, row: -1, col: c };
-        g.element = createGemElement(g);
-        g.element.style.transition = "none";
-        g.element.style.transform = `translate(${c * 147}px, -150px)`;
-        gemGrid.appendChild(g.element);
-
-        void g.element.offsetHeight;
-
-        setTimeout(() => {
-          g.row = r;
-          g.col = c;
-          gemBoard[r][c] = g;
-          positionGem(g);
-        }, 50);
-      }
-    }
-  }
-}
-
 // ===== RESOLVE LOOP =====
 async function resolveBoard() {
   isProcessing = true;
@@ -387,9 +285,15 @@ async function resolveBoard() {
 
 // ===== INIT =====
 (async function initGame() {
-  if (await loadVocabFromURL()) {
+
+  // ✅ WAIT for Firebase to populate window.preloadedVocab
+  await new Promise(resolve => setTimeout(resolve, 200));
+
+  if (await loadVocab()) {
     buildBoard();
     buildCards();
     startTimer();
   }
+
 })();
+``
