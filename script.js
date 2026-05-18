@@ -464,44 +464,67 @@ function refillFromRecycle() {
 
 function findMatches() {
 
+  const visited = Array.from({ length: rows }, () =>
+    Array(cols).fill(false)
+  );
+
   const matches = [];
 
-  // horizontal
+  function flood(r, c, color, group) {
+
+    const stack = [[r, c]];
+
+    while (stack.length) {
+
+      const [cr, cc] = stack.pop();
+
+      if (
+        cr < 0 || cr >= rows ||
+        cc < 0 || cc >= cols
+      ) continue;
+
+      if (visited[cr][cc]) continue;
+
+      const cell = gemBoard[cr][cc];
+
+      if (!cell || cell.color !== color) continue;
+
+      visited[cr][cc] = true;
+
+      group.push(cell);
+
+      stack.push([cr + 1, cc]);
+      stack.push([cr - 1, cc]);
+      stack.push([cr, cc + 1]);
+      stack.push([cr, cc - 1]);
+
+    }
+
+  }
+
   for (let r = 0; r < rows; r++) {
 
-    let streak = 1;
+    for (let c = 0; c < cols; c++) {
 
-    for (let c = 1; c < cols; c++) {
+      const cell = gemBoard[r][c];
 
-      const a = gemBoard[r][c];
-      const b = gemBoard[r][c - 1];
+      if (!cell || visited[r][c]) continue;
 
-      if (a && b && a.color === b.color) {
+      const group = [];
 
-        streak++;
+      flood(r, c, cell.color, group);
 
-      } else {
-
-        if (streak >= 3) {
-
-          for (let i = 0; i < streak; i++) {
-            matches.push(gemBoard[r][c - 1 - i]);
-          }
-
-        }
-
-        streak = 1;
-      }
-    }
-
-    if (streak >= 3) {
-
-      for (let i = 0; i < streak; i++) {
-        matches.push(gemBoard[r][cols - 1 - i]);
+      if (group.length >= 3) {
+        matches.push(...group);
       }
 
     }
+
   }
+
+  return [...new Set(matches)];
+
+}
 
   // vertical
   for (let c = 0; c < cols; c++) {
