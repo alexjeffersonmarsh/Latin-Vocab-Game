@@ -114,9 +114,7 @@ async function loadVocab() {
 
   const params = new URLSearchParams(window.location.search);
 
-  // =====================================
-  // PRIORITY 1: FIREBASE
-  // =====================================
+  // ===== FIREBASE =====
 
   if (
     window.preloadedVocab &&
@@ -135,13 +133,13 @@ async function loadVocab() {
 
     fullVocab = vocab.slice(0, rows * cols);
 
+    recyclePool = [...fullVocab];
+
     return true;
 
   }
 
-  // =====================================
-  // PRIORITY 2: JSON URL
-  // =====================================
+  // ===== JSON =====
 
   const vocabPath = params.get("vocab");
 
@@ -164,6 +162,8 @@ async function loadVocab() {
       }));
 
       fullVocab = vocab.slice(0, rows * cols);
+
+      recyclePool = [...fullVocab];
 
       return true;
 
@@ -250,7 +250,7 @@ function positionGem(g) {
 
 }
 
-// ===== GEM ELEMENT =====
+// ===== CREATE GEM =====
 
 function createGemElement(g) {
 
@@ -361,7 +361,7 @@ function buildCards() {
 
 }
 
-// ===== GEM SELECT =====
+// ===== SELECT GEM =====
 
 function selectGem(g) {
 
@@ -381,7 +381,7 @@ function selectGem(g) {
 
 }
 
-// ===== CARD SELECT =====
+// ===== SELECT CARD =====
 
 function selectCard(card) {
 
@@ -407,9 +407,7 @@ function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
 
-  // =====================================
-  // CORRECT MATCH
-  // =====================================
+  // ===== CORRECT =====
 
   if (
     selectedGem.id ===
@@ -431,6 +429,16 @@ function tryMatch() {
           gemBoard[r][c].id === mid
         ) {
 
+          recyclePool.push({
+
+            id: gemBoard[r][c].id,
+
+            word: gemBoard[r][c].word,
+
+            definition: gemBoard[r][c].definition
+
+          });
+
           gemBoard[r][c].element.remove();
 
           gemBoard[r][c] = null;
@@ -447,9 +455,7 @@ function tryMatch() {
 
   }
 
-  // =====================================
-  // WRONG MATCH
-  // =====================================
+  // ===== WRONG =====
 
   else {
 
@@ -476,7 +482,117 @@ function tryMatch() {
 
 }
 
-// ===== BOARD RESOLUTION =====
+// ===== APPLY GRAVITY =====
+
+function applyGravity() {
+
+  for (let c = 0; c < cols; c++) {
+
+    for (let r = rows - 1; r >= 0; r--) {
+
+      if (gemBoard[r][c] === null) {
+
+        for (let rr = r - 1; rr >= 0; rr--) {
+
+          if (gemBoard[rr][c]) {
+
+            const fallingGem = gemBoard[rr][c];
+
+            gemBoard[r][c] = fallingGem;
+            gemBoard[rr][c] = null;
+
+            fallingGem.row = r;
+
+            positionGem(fallingGem);
+
+            break;
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
+}
+
+// ===== REFILL BOARD =====
+
+function refillFromRecycle() {
+
+  for (let c = 0; c < cols; c++) {
+
+    for (let r = 0; r < rows; r++) {
+
+      if (gemBoard[r][c] === null) {
+
+        if (recyclePool.length === 0) continue;
+
+        const item = recyclePool.shift();
+
+        const color =
+          colors[
+            Math.floor(Math.random() * colors.length)
+          ];
+
+        const g = {
+
+          ...item,
+
+          color,
+
+          row: r,
+
+          col: c
+
+        };
+
+        g.element = createGemElement(g);
+
+        gemGrid.appendChild(g.element);
+
+        gemBoard[r][c] = g;
+
+        positionGem(g);
+
+      }
+
+    }
+
+  }
+
+}
+
+// ===== FIND MATCHES =====
+
+function findMatches() {
+
+  return [];
+
+}
+
+// ===== CLEAR MATCHES =====
+
+function clearMatches(matches) {
+
+  matches.forEach(g => {
+
+    if (g.element) {
+
+      g.element.remove();
+
+    }
+
+    gemBoard[g.row][g.col] = null;
+
+  });
+
+}
+
+// ===== RESOLVE BOARD =====
 
 async function resolveBoard() {
 
@@ -514,8 +630,6 @@ async function resolveBoard() {
 
 async function startLoadedGame() {
 
-  // Reset game state
-
   score = 0;
 
   timeLeft = 180;
@@ -531,8 +645,6 @@ async function startLoadedGame() {
 
   timerDisplay.textContent = timeLeft;
 
-  // Load vocabulary
-
   const loaded = await loadVocab();
 
   if (!loaded) {
@@ -542,8 +654,6 @@ async function startLoadedGame() {
     return;
 
   }
-
-  // Build game
 
   buildBoard();
 
@@ -556,14 +666,13 @@ async function startLoadedGame() {
 }
 
 // =========================================
-// EXPOSE TO FIREBASE LOADER
+// EXPOSE TO HTML LOADER
 // =========================================
 
 window.startLoadedGame = startLoadedGame;
 
 // =========================================
-// OPTIONAL AUTO-START
-// (for JSON-only loading)
+// OPTIONAL AUTO START
 // =========================================
 
 (async () => {
@@ -574,16 +683,11 @@ window.startLoadedGame = startLoadedGame;
     params.get("id") ||
     params.get("set");
 
-  // If Firebase exists,
-  // wait for game.html loader
-
   if (hasFirebaseSet) {
 
     return;
 
   }
-
-  // Otherwise allow direct JSON loading
 
   const hasJSON =
     params.get("vocab");
