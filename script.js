@@ -1,3 +1,4 @@
+
 // ===== SETTINGS =====
 const rows = 5;
 const cols = 4;
@@ -27,6 +28,9 @@ let isProcessing = false;
 
 let vocab = [];
 let fullVocab = [];
+
+let masteredVocab = [];
+let comboRecycle = [];
 
 let gemBoard = [];
 
@@ -66,7 +70,7 @@ const playChime = () => playTone(600, 0.25);
 const playBuzz = () => playTone(150, 0.3, "square");
 const playExplosion = () => playTone(90, 0.2);
 
-// ===== COMBO UI =====
+// ===== COMBO TEXT =====
 function showComboText(text) {
   const div = document.createElement("div");
   div.className = "combo-text";
@@ -85,7 +89,7 @@ function isAnyGemMoving() {
 }
 
 // =========================================
-// VOCAB LOADER (20 WORDS ONLY)
+// VOCAB
 // =========================================
 
 async function loadVocab() {
@@ -103,16 +107,18 @@ async function loadVocab() {
 
   fullVocab = vocab.slice(0, 20);
 
+  masteredVocab = [];
+  comboRecycle = [];
+
   return true;
 }
 
-// ===== SCORE =====
+// ===== SCORE / TIMER =====
 function updateScore(val) {
   score += val;
   scoreDisplay.textContent = score;
 }
 
-// ===== TIMER =====
 function startTimer() {
   clearInterval(timerInterval);
 
@@ -139,13 +145,11 @@ function positionGem(g) {
   g.element.style.transform = `translate(${x}px, ${y}px)`;
 
   setTimeout(() => {
-    if (g.element) {
-      g.element.setAttribute("data-moving", "false");
-    }
+    if (g.element) g.element.setAttribute("data-moving", "false");
   }, FALL_TIME);
 }
 
-// ===== CREATE GEM =====
+// ===== GEM CREATION =====
 function createGemElement(g) {
   const d = document.createElement("div");
   d.className = "gem";
@@ -189,9 +193,7 @@ function buildBoard() {
 
       g.element = createGemElement(g);
       gemGrid.appendChild(g.element);
-
       positionGem(g);
-
       gemBoard[r][c] = g;
     }
   }
@@ -215,10 +217,9 @@ function buildCards() {
       cardGrid.appendChild(d);
 
     });
-
 }
 
-// ===== SELECTION =====
+// ===== MATCHING =====
 function selectGem(g) {
   if (isProcessing || isAnyGemMoving()) return;
 
@@ -241,7 +242,6 @@ function selectCard(card) {
   tryMatch();
 }
 
-// ===== MATCH =====
 function tryMatch() {
 
   if (!selectedGem || !selectedCard) return;
@@ -263,6 +263,8 @@ function tryMatch() {
       }
     }
 
+    masteredVocab.push(mid);
+
     selectedCard.remove();
     resolveBoard();
 
@@ -278,7 +280,7 @@ function tryMatch() {
   selectedCard = null;
 }
 
-// ===== GRAVITY (FIXED) =====
+// ===== GRAVITY =====
 function applyGravity() {
 
   let moved = false;
@@ -329,15 +331,10 @@ function findMatches() {
 
       const [cr, cc] = stack.pop();
 
-      if (
-        cr < 0 || cr >= rows ||
-        cc < 0 || cc >= cols
-      ) continue;
-
+      if (cr < 0 || cr >= rows || cc < 0 || cc >= cols) continue;
       if (visited[cr][cc]) continue;
 
       const cell = gemBoard[cr][cc];
-
       if (!cell || cell.color !== color) continue;
 
       visited[cr][cc] = true;
@@ -358,7 +355,6 @@ function findMatches() {
       if (!cell || visited[r][c]) continue;
 
       const group = [];
-
       flood(r, c, cell.color, group);
 
       if (group.length >= 3) {
@@ -370,7 +366,7 @@ function findMatches() {
   return [...new Set(matches)];
 }
 
-// ===== CLEAR MATCHES =====
+// ===== COMBO CLEAR =====
 function clearMatches(matches) {
 
   if (!matches.length) return;
@@ -388,10 +384,86 @@ function clearMatches(matches) {
 
     if (g.element) g.element.remove();
 
-    if (gemBoard[g.row] && gemBoard[g.row][g.col] === g) {
+    if (gemBoard[g.row]?.[g.col] === g) {
       gemBoard[g.row][g.col] = null;
     }
+
+    if (!masteredVocab.includes(g.id)) {
+      comboRecycle.push({
+        id: g.id,
+        word: g.word,
+        definition: g.definition
+      });
+    }
   });
+}
+
+// ===== COMBO REFILL =====
+function refillFromCombo() {
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+
+      if (!gemBoard[r][c] && comboRecycle.length) {
+
+        const item = comboRecycle.pop();
+
+        const g = {
+          ...item,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          row: r,
+          col: c
+        };
+
+        g.element = createGemElement(g);
+        gemGrid.appendChild(g.element);
+
+        gemBoard[r][c] = g;
+        positionGem(g);
+      }
+    }
+  }
+}
+
+// ===== STUCK DETECTION + RESHUFFLE =====
+function hasMoves() {
+  const colorsFlat = gemBoard.flat().filter(Boolean).map(g => g.color);
+  const unique = new Set(colorsFlat);
+  return unique.size >= 2; // simple heuristic
+}
+
+function reshuffleBoard() {
+
+  const allGems = gemBoard.flat().filter(Boolean);
+
+  const pool = [...allGems, ...comboRecycle];
+
+  comboRecycle = [];
+
+  pool.sort(() => Math.random() - 0.5);
+
+  gemBoard = Array.from({ length: rows }, () => Array(cols).fill(null));
+
+  let i = 0;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+
+      const item = pool[i++];
+      if (!item) continue;
+
+      item.row = r;
+      item.col = c;
+
+      if (!item.element) item.element = createGemElement(item);
+
+      gemGrid.appendChild(item.element);
+
+      gemBoard[r][c] = item;
+
+      positionGem(item);
+    }
+  }
 }
 
 // ===== RESOLVE LOOP =====
@@ -409,13 +481,20 @@ async function resolveBoard() {
       if (moved) await wait(FALL_TIME);
     }
 
+    refillFromCombo();
+
     const matches = findMatches();
 
     if (!matches.length) {
 
-      const anyLeft = gemBoard.some(row =>
-        row.some(cell => cell !== null)
-      );
+      // 🔥 STUCK DETECTION
+      if (!hasMoves()) {
+        reshuffleBoard();
+        await wait(FALL_TIME);
+        continue;
+      }
+
+      const anyLeft = gemBoard.some(r => r.some(c => c));
 
       if (!anyLeft) {
         alert("You cleared all vocabulary! Final score: " + score);
@@ -455,7 +534,7 @@ async function startLoadedGame() {
 
 window.startLoadedGame = startLoadedGame;
 
-// ===== AUTO BOOT =====
+// ===== BOOT =====
 (async () => {
 
   let tries = 0;
