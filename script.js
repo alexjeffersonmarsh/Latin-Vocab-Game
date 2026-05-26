@@ -269,6 +269,26 @@ function tryMatch() {
     masteredVocab.push(mid);
 
     selectedCard.remove();
+
+    // ===== CHECK FOR GAME COMPLETION =====
+const remainingCards = document.querySelectorAll(".card");
+
+if (remainingCards.length === 0) {
+
+  clearInterval(timerInterval);
+
+  const timeBonus = timeLeft * 10;
+
+  updateScore(timeBonus);
+
+  setTimeout(() => {
+    alert(
+      `Board Complete!\n\nTime Bonus: ${timeBonus}\nFinal Score: ${score}`
+    );
+  }, 300);
+
+  return;
+}
     resolveBoard();
 
   } else {
