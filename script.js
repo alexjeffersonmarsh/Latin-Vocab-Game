@@ -4,8 +4,8 @@ const rows = 5;
 const cols = 4;
 
 // ===== TIMING =====
-const FALL_TIME = 450;
-const CLEAR_TIME = 400;
+const FALL_TIME = 100;
+const CLEAR_TIME = 100;
 
 // ===== COLORS =====
 const colorMap = {
@@ -147,7 +147,7 @@ function positionGem(g) {
 
   setTimeout(() => {
     if (g.element) g.element.setAttribute("data-moving", "false");
-  }, FALL_TIME);
+  }, FALL_TIME - 40);
 }
 
 // ===== GEM =====
@@ -464,7 +464,7 @@ async function resolveBoard() {
     }
 
     // stabilize DOM before refill
-    await wait(120);
+    await wait(20);
 
     refillFromCombo();
 
@@ -479,14 +479,14 @@ async function resolveBoard() {
     }
 
     // final stabilization delay
-    await wait(150);
+    await wait(25);
 
     const matches = findMatches();
 
     if (!matches.length) break;
 
     clearMatches(matches);
-    await wait(CLEAR_TIME + 100);
+    await wait(CLEAR_TIME + 10);
   }
 
   isProcessing = false;
