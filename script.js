@@ -187,7 +187,7 @@ function buildBoard() {
 
       const g = {
         ...item,
-        color: colors[Math.floor(Math.random() - 0.5)],
+        color: colors[Math.floor(Math.random() * colors.length)],
         row: r,
         col: c
       };
