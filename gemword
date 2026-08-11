@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vocabulary Jewel Game</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- =========================================
+     TEACHER PANEL
+========================================= -->
+
+<div id="teacher-panel">
+
+    <h2>GemWords</h2>
+
+    <p>Load a vocabulary set from Firebase.</p>
+
+    <input
+        type="text"
+        id="set-id-input"
+        placeholder="Enter Vocabulary Set ID"
+    >
+
+    <button id="load-set-btn">
+        Start Game
+    </button>
+
+</div>
+
+<!-- ===== HUD ===== -->
+
+<div class="stats-hud">
+
+    <div class="stat-item">
+        SCORE:
+        <span id="score">0</span>
+    </div>
+
+    <div class="stat-item">
+        TIME:
+        <span id="timer">180</span>
+    </div>
+
+</div>
+
+<!-- ===== GAME AREA ===== -->
+
+<div id="game-container">
+
+    <div class="board-column">
+
+        <h3>Words</h3>
+
+        <div id="gemGrid"></div>
+
+    </div>
+
+    <div class="board-column">
+
+        <h3>Definitions</h3>
+
+        <div id="cardGrid"></div>
+
+    </div>
+
+</div>
+
+<!-- =========================================
+     FIREBASE LOADER
+========================================= -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    doc,
+    getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyD-goTprU8NMVqmsAlve6BAfXrPZN-sQdQ",
+
+  authDomain: "bubbleword-30367.firebaseapp.com",
+
+  projectId: "bubbleword-30367",
+
+  storageBucket: "bubbleword-30367.firebasestorage.app",
+
+  messagingSenderId: "1058393039019",
+
+  appId: "1:1058393039019:web:72ffaf6dab677b9a3657ee"
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* =========================================
+   LOAD VOCABULARY SET
+========================================= */
+
+async function loadSet(setId) {
+
+    const ref = doc(db, "vocabSets", setId);
+
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+
+        throw new Error("Vocabulary set not found.");
+
+    }
+
+    const data = snapshot.data();
+
+    // NEW FORMAT
+
+    if (Array.isArray(data.items)) {
+
+        return data.items;
+
+    }
+
+    // LEGACY FORMAT
+
+    let terms = data.terms;
+
+    if (typeof terms === "string") {
+
+        try {
+
+            terms = JSON.parse(terms);
+
+        } catch (e) {
+
+            console.error("Parse error:", e);
+
+            terms = [];
+
+        }
+
+    }
+
+    return terms || [];
+
+}
+
+/* =========================================
+   START GAME
+========================================= */
+
+async function startGameWithSet(setId) {
+
+    try {
+
+        const vocab = await loadSet(setId);
+
+        window.preloadedVocab = vocab.map(item => ({
+
+            word:
+                item.word,
+
+            definition:
+                item.definition ||
+                item.meaning ||
+                ""
+
+        }));
+
+        console.log(
+            "GemWords vocab loaded:",
+            window.preloadedVocab
+        );
+
+        const panel =
+            document.getElementById("teacher-panel");
+
+        if (panel) {
+
+            panel.style.display = "none";
+
+        }
+
+        if (window.startLoadedGame) {
+
+            window.startLoadedGame();
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Could not load vocabulary set.");
+
+    }
+
+}
+
+/* =========================================
+   URL PARAM SUPPORT
+========================================= */
+
+const params =
+    new URLSearchParams(window.location.search);
+
+const setId =
+    params.get("id") ||
+    params.get("set");
+
+if (setId) {
+
+    startGameWithSet(setId);
+
+}
+
+/* =========================================
+   MANUAL SET ID LOADER
+========================================= */
+
+document
+    .getElementById("load-set-btn")
+    .addEventListener("click", () => {
+
+        const setId =
+            document
+            .getElementById("set-id-input")
+            .value
+            .trim();
+
+        if (!setId) {
+
+            alert("Please enter a set ID.");
+
+            return;
+
+        }
+
+        startGameWithSet(setId);
+
+    });
+
+</script>
